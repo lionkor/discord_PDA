@@ -36,6 +36,7 @@ import random
 
 class Config:
     prefix = "+"
+    polls_enabled = False
 
 
 def time_str ():
@@ -82,7 +83,7 @@ class Bot (discord.Client):
     def save_configs (self):
         f = open ("configs.data", "w+")
         for (_id, _conf) in self.configs.items ():
-            f.write (str (_id) + ":" + str (_conf.prefix) + "," + "\n")
+            f.write (str (_id) + ":" + str (_conf.prefix) + "," + str (_conf.polls_enabled) + ",\n")
         f.close ()
 
     def load_configs (self):
@@ -92,15 +93,15 @@ class Bot (discord.Client):
             _id = int (line.split (':')[0])
             self.configs[_id] = Config ()
             self.configs[_id].prefix = line.split (':')[1].split (',')[0]
+            self.configs[_id].polls_enabled = bool (line.split (':')[1].split (',')[1])
         f.close ()
 
     async def set_prefix (self, msg: str, message: discord.Message):
         if message.guild is None:
             return "Setting the prefix in DMs is not yet supported."
         else:
-            admin: discord.Permissions = message.author.permissions_in (message.channel)
-            if not admin.administrator:
-                return "Administrator permission required, sorry!"
+            if not message.author.guild_permissions.administrator:
+                return "Must be administrator to use. Sorry!"
             self.configs[message.guild.id].prefix = msg
             return "Prefix set to `" + self.configs[message.guild.id].prefix + "`"
 
@@ -133,8 +134,7 @@ class Bot (discord.Client):
             return "Must be in a server."
         else:
             # TODO must be admin
-            admin: discord.Permissions = message.author.permissions_in (message.channel)
-            if not admin.administrator:
+            if not message.author.guild_permissions.administrator:
                 return "Must be administrator to use. Sorry!"
             # must mention a channel
             if len (message.channel_mentions) == 0:
@@ -187,6 +187,19 @@ class Bot (discord.Client):
         log (new_content)
         return new_content
 
+    async def toggle_polls (self, content: str, message: discord.Message):
+        if message.guild is not None:
+            if not message.author.guild_permissions.administrator:
+                return "Must be administrator to use. Sorry!"
+            self.configs[message.guild.id].polls_enabled = bool (content)
+            return "Polls toggled!"
+        else:
+            polls_enabled = Config ().polls_enabled
+            return "Polls cannot be toggled in DMs"
+
+    async def start_poll (self, content: str, message: discord.Message):
+        if message.guild
+
     commands = {
         "capify": capify,
         "aA": capify,
@@ -201,6 +214,8 @@ class Bot (discord.Client):
         "rng": rng,
         "font": font,
         "vote": setup_vote,  # admin only
+        "polls": toggle_polls,  # admin only
+        "poll": start_poll,
         # "lock_vote": lock_vote, # admin only
     }
 
@@ -253,8 +268,11 @@ class Bot (discord.Client):
             if message.guild is None:
                 await message.channel.send (content = "Cannot reset prefix for DMs.")
             else:
-                self.configs[message.guild.id].prefix = Config ().prefix
-                await message.channel.send (content = "Prefix reset to " + Config ().prefix)
+                if not message.author.guild_permissions.administrator:
+                    await message.channel.send (content = "Must be administrator to use. Sorry!")
+                else:
+                    self.configs[message.guild.id].prefix = Config ().prefix
+                    await message.channel.send (content = "Prefix reset to " + Config ().prefix)
 
         if has_prefix:
             log ('Message from {0.author} in \"{0.channel}\": \"{0.content}\"'.format (message))
