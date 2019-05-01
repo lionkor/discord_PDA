@@ -37,6 +37,7 @@ import random
 class Config:
     prefix = "+"
     polls_enabled = False
+    poll_channel = -1
 
 
 def time_str ():
@@ -83,7 +84,8 @@ class Bot (discord.Client):
     def save_configs (self):
         f = open ("configs.data", "w+")
         for (_id, _conf) in self.configs.items ():
-            f.write (str (_id) + ":" + str (_conf.prefix) + "," + str (_conf.polls_enabled) + ",\n")
+            f.write (str (_id) + ":" + str (_conf.prefix) + "," + str (_conf.polls_enabled) + "," + str (
+                _conf.poll_channel) + ",\n")
         f.close ()
 
     def load_configs (self):
@@ -94,6 +96,7 @@ class Bot (discord.Client):
             self.configs[_id] = Config ()
             self.configs[_id].prefix = line.split (':')[1].split (',')[0]
             self.configs[_id].polls_enabled = bool (line.split (':')[1].split (',')[1])
+            self.configs[_id].poll_channel = int (line.split (':')[1].split (',')[2])
         f.close ()
 
     async def set_prefix (self, msg: str, message: discord.Message):
@@ -195,10 +198,20 @@ class Bot (discord.Client):
             return "Polls toggled!"
         else:
             polls_enabled = Config ().polls_enabled
-            return "Polls cannot be toggled in DMs"
+            return "Polls cannot be toggled in DMs."
 
     async def start_poll (self, content: str, message: discord.Message):
-        if message.guild
+        if message.guild is None:
+            return "Can't do polls in DMs."
+        else:
+            if not self.configs[message.guild.id].polls_enabled:
+                return "Polls are disabled. Contact an admin."
+            if self.configs[message.guild.id].poll_channel == -1:
+                self.configs[message.guild.id].poll_channel = (await message.guild.create_text_channel ("polls")).id
+            channel: discord.TextChannel = message.guild.get_channel (self.configs[message.guild.id].poll_channel)
+            msg: discord.Message = (await channel.send (content = content + " (by {0})".format (message.author.mention)))
+            await msg.add_reaction (u"\U0001F53C")
+            await msg.add_reaction (u"\U0001F53D")
 
     commands = {
         "capify": capify,
