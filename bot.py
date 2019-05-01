@@ -3,12 +3,10 @@
 # I know this code is really bad, I'll refactor it later.
 # It's just a hobby project, you should not use this for
 # bigger servers, probably.
-# 
+#
 #
 
 import discord
-import pda_io
-from pda_cpp import *
 from datetime import datetime
 import random
 
