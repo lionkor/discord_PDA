@@ -58,6 +58,7 @@ class Bot (discord.Client):
     votes = dict ()  # {message_id: [upvotes, downvotes], }
 
     async def capify (self, msg: str, message: discord.Message):
+        msg = msg.replace ("@everyone", "@ everyone").replace ("@here", "@ here")
         result = ""
         u_case = bool (random.randint (0, 1))
         for c in msg:
@@ -69,6 +70,7 @@ class Bot (discord.Client):
         return "{0}".format (result)
 
     async def spoilerize (self, msg: str, message: discord.Message):
+        msg = msg.replace ("@everyone", "@ everyone").replace ("@here", "@ here")
         result = ""
         for c in msg:
             result += "||" + c + "||"
@@ -168,12 +170,14 @@ class Bot (discord.Client):
         return "RNG: " + str (random.randint (min (_min, _max), max (_min, _max)))
 
     async def font (self, content: str, message: discord.Message):
+        content = content.replace ("@everyone", "@ everyone").replace ("@here", "@ here")
         fonts = {
             "nice": " 𝒶𝒷𝒸𝒹𝑒𝒻𝑔𝒽𝒾𝒿𝓀𝓁𝓂𝓃𝑜𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏𝒜𝐵𝒞𝒟𝐸𝐹𝒢𝐻𝐼𝒥𝒦𝐿𝑀𝒩𝒪𝒫𝒬𝑅𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵𝟣𝟤𝟥𝟦𝟧𝟨𝟩𝟪𝟫𝟢+-/*.,!?_#+",
             "mono": " 𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿𝟶+-/*.,!?_#+",
             "circle": " ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏ①②③④⑤⑥⑦⑧⑨⓪+-/*.,!?_#+",
             "super": " ᵃᵇᶜᵈᵉᶠᵍʰᶦʲᵏˡᵐⁿᵒᵖᵠʳˢᵗᵘᵛʷˣʸᶻᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᵠᴿˢᵀᵁⱽᵂˣˣʸᶻʸᶻ¹²³⁴⁵⁶⁷⁸⁹⁰⁺⁻/*.,!?_#⁺",
-            "tiny": " ᴀʙᴄᴅᴇғɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢABCDEFGHIJKLMNOPQRSTUVWXXYZYZ1234567890+-/*.,!?_#+"
+            "tiny": " ᴀʙᴄᴅᴇғɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢABCDEFGHIJKLMNOPQRSTUVWXXYZYZ1234567890+-/*.,!?_#+",
+            "fraktur": " 𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ1234567890+-/*.,!?_#+",
         }
         normal_font = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890+-/*.,!?_#+"
 
@@ -201,7 +205,10 @@ class Bot (discord.Client):
             polls_enabled = Config ().polls_enabled
             return "Polls cannot be toggled in DMs."
 
+    # TODO delete poll
+
     async def start_poll (self, content: str, message: discord.Message):
+        content = content.replace ("@everyone", "@ everyone").replace ("@here", "@ here")
         if message.guild is None:
             return "Can't do polls in DMs."
         else:
@@ -244,7 +251,7 @@ class Bot (discord.Client):
         [["coinflip"], "{0}` - Flips a coin (randomly gives Heads or Tails)."],
         [["rng"], "{0} <min> <max>` - Random number generator - returns a number between `min` and `max`!"],
         [["font"],
-         "{0} <fontname> <text>` - Turns text into text of a different font! Avaliable fonts: nice, mono, super, circle, tiny"]
+         "{0} <fontname> <text>` - Turns text into text of a different font! Avaliable fonts: nice, mono, super, circle, tiny, fraktur"]
     ]
 
     async def on_ready (self):
