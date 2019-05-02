@@ -65,7 +65,7 @@ class Bot (discord.Client):
             else:
                 result += c.lower ()
             u_case = not u_case
-        return "```{0}```".format (result)
+        return "{0}".format (result)
 
     async def spoilerize (self, msg: str, message: discord.Message):
         result = ""
@@ -110,16 +110,16 @@ class Bot (discord.Client):
 
     async def display_help (self, msg: str, message: discord.Message):
         log ("help: " + msg)
+        prefix = Config ().prefix
+        if message.guild is not None:
+            prefix = self.configs[message.guild.id].prefix
         if len (msg) > 0:
             for _command in self.command_help:
                 for _item in _command[0]:
                     if msg == _item:
-                        return _command[1].format (_item)
+                        return "`" + prefix + _command[1].format (_item)
             return "command `{0}` not found.".format (msg)
         else:
-            prefix = Config ().prefix
-            if message.guild is not None:
-                prefix = self.configs[message.guild.id].prefix
             fullhelp = "\t\t**PDA Help**\n\n" \
                        "_To use the following commands, precede them with `{0}`._\n\n".format (prefix)
             for _command in self.command_help:
