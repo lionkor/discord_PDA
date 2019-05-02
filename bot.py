@@ -29,6 +29,7 @@
 # SOFTWARE.
 #
 
+
 import discord
 from datetime import datetime
 import random
@@ -209,7 +210,8 @@ class Bot (discord.Client):
             if self.configs[message.guild.id].poll_channel == -1:
                 self.configs[message.guild.id].poll_channel = (await message.guild.create_text_channel ("polls")).id
             channel: discord.TextChannel = message.guild.get_channel (self.configs[message.guild.id].poll_channel)
-            msg: discord.Message = (await channel.send (content = content + " (by {0})".format (message.author.mention)))
+            msg: discord.Message = (
+                await channel.send (content = content + " (by {0})".format (message.author.mention)))
             await msg.add_reaction (u"\U0001F53C")
             await msg.add_reaction (u"\U0001F53D")
 
