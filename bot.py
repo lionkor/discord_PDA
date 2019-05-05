@@ -52,7 +52,6 @@ def log (msg):
     print (time + " [LOG] " + str (msg))
     print (time + " [LOG] " + str (msg), file = open ("log.txt", "a"))
 
-
 class Bot (discord.Client):
     configs: {discord.Guild.id, Config} = dict ()
 
@@ -71,7 +70,7 @@ class Bot (discord.Client):
             u_case = not u_case
         # deleting the message (feature requested by users)
         await message.delete ()
-        return "{0}: {1}".format (message.author.mention, result)
+        return "{0}: {1}".format (message.author.display_name, result)
 
     async def spoilerize (self, msg: str, message: discord.Message):
         msg = msg.replace ("@everyone", "@ everyone").replace ("@here",
