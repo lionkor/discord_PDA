@@ -43,7 +43,8 @@ class Config:
 
 def time_str ():
     dtn = datetime.now ()
-    return str (dtn.date ()) + " " + str (dtn.hour) + ":" + str (dtn.minute) + ":" + str (dtn.second)
+    return str (dtn.date ()) + " " + str (dtn.hour) + ":" + str (
+        dtn.minute) + ":" + str (dtn.second)
 
 
 def log (msg):
@@ -58,7 +59,8 @@ class Bot (discord.Client):
     votes = dict ()  # {message_id: [upvotes, downvotes], }
 
     async def capify (self, msg: str, message: discord.Message):
-        msg = msg.replace ("@everyone", "@ everyone").replace ("@here", "@ here")
+        msg = msg.replace ("@everyone", "@ everyone").replace ("@here",
+                                                               "@ here")
         result = ""
         u_case = bool (random.randint (0, 1))
         for c in msg:
@@ -67,10 +69,13 @@ class Bot (discord.Client):
             else:
                 result += c.lower ()
             u_case = not u_case
-        return "{0}".format (result)
+        # deleting the message (feature requested by users)
+        await message.delete ()
+        return "{0}: {1}".format (message.author.mention, result)
 
     async def spoilerize (self, msg: str, message: discord.Message):
-        msg = msg.replace ("@everyone", "@ everyone").replace ("@here", "@ here")
+        msg = msg.replace ("@everyone", "@ everyone").replace ("@here",
+                                                               "@ here")
         result = ""
         for c in msg:
             result += "||" + c + "||"
@@ -87,7 +92,8 @@ class Bot (discord.Client):
     def save_configs (self):
         f = open ("configs.data", "w+")
         for (_id, _conf) in self.configs.items ():
-            f.write (str (_id) + ":" + str (_conf.prefix) + "," + str (_conf.polls_enabled) + "," + str (
+            f.write (str (_id) + ":" + str (_conf.prefix) + "," + str (
+                _conf.polls_enabled) + "," + str (
                 _conf.poll_channel) + ",\n")
         f.close ()
 
@@ -98,8 +104,10 @@ class Bot (discord.Client):
             _id = int (line.split (':')[0])
             self.configs[_id] = Config ()
             self.configs[_id].prefix = line.split (':')[1].split (',')[0]
-            self.configs[_id].polls_enabled = bool (line.split (':')[1].split (',')[1])
-            self.configs[_id].poll_channel = int (line.split (':')[1].split (',')[2])
+            self.configs[_id].polls_enabled = bool (
+                line.split (':')[1].split (',')[1])
+            self.configs[_id].poll_channel = int (
+                line.split (':')[1].split (',')[2])
         f.close ()
 
     async def set_prefix (self, msg: str, message: discord.Message):
@@ -109,7 +117,8 @@ class Bot (discord.Client):
             if not message.author.guild_permissions.administrator:
                 return "Must be administrator to use. Sorry!"
             self.configs[message.guild.id].prefix = msg
-            return "Prefix set to `" + self.configs[message.guild.id].prefix + "`"
+            return "Prefix set to `" + self.configs[
+                message.guild.id].prefix + "`"
 
     async def display_help (self, msg: str, message: discord.Message):
         log ("help: " + msg)
@@ -124,7 +133,8 @@ class Bot (discord.Client):
             return "command `{0}` not found.".format (msg)
         else:
             fullhelp = "\t\t**PDA Help**\n\n" \
-                       "_To use the following commands, precede them with `{0}`._\n\n".format (prefix)
+                       "_To use the following commands, " \
+                       "precede them with `{0}`._\n\n".format (prefix)
             for _command in self.command_help:
                 for _item in _command[0]:
                     fullhelp += "`" + prefix + _command[1].format (_item) + "\n"
@@ -132,7 +142,8 @@ class Bot (discord.Client):
 
     async def thank (self, content, message: discord.Message):
         with open ("thanks.txt", "a") as f:
-            f.write (time_str () + " " + str (message.author.id) + " (" + str (message.author) + ") thanked me!\n")
+            f.write (time_str () + " " + str (message.author.id) + " (" + str (
+                message.author) + ") thanked me!\n")
         return "Noted! I appreciate it :)"
 
     async def setup_vote (self, content: str, message: discord.Message):
@@ -146,7 +157,8 @@ class Bot (discord.Client):
             if len (message.channel_mentions) == 0:
                 return "Must mention a channel, try again."
             # now message.channel_mentions[0] is the channel to send vote in
-            msg: discord.Message = (await message.channel_mentions[0].send (content = content[content.find (" "):]))
+            msg: discord.Message = (await message.channel_mentions[0].send (
+                content = content[content.find (" "):]))
             await msg.add_reaction (u"\U0001F53C")
             await msg.add_reaction (u"\U0001F53D")
             self.votes[msg.id] = [0, 0]
@@ -160,26 +172,37 @@ class Bot (discord.Client):
     async def rng (self, content: str, message: discord.Message):
         numbers = content.split (" ")
         if len (numbers) != 2:
-            return "Incorrect number of arguments! I only need minimum and maximum!"
+            return "Incorrect number of arguments! I only need minimum and " \
+                   "maximum!"
         try:
             _min = int (numbers[0])
             _max = int (numbers[1])
         except Exception as e:
             log (str (e))
             return "Make sure both arguments are _whole_ numbers!"
-        return "RNG: " + str (random.randint (min (_min, _max), max (_min, _max)))
+        return "RNG: " + str (
+            random.randint (min (_min, _max), max (_min, _max)))
 
     async def font (self, content: str, message: discord.Message):
-        content = content.replace ("@everyone", "@ everyone").replace ("@here", "@ here")
+        content = content.replace ("@everyone", "@ everyone").replace ("@here",
+                                                                       "@ here")
         fonts = {
-            "nice": " 𝒶𝒷𝒸𝒹𝑒𝒻𝑔𝒽𝒾𝒿𝓀𝓁𝓂𝓃𝑜𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏𝒜𝐵𝒞𝒟𝐸𝐹𝒢𝐻𝐼𝒥𝒦𝐿𝑀𝒩𝒪𝒫𝒬𝑅𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵𝟣𝟤𝟥𝟦𝟧𝟨𝟩𝟪𝟫𝟢+-/*.,!?_#+",
-            "mono": " 𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿𝟶+-/*.,!?_#+",
-            "circle": " ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏ①②③④⑤⑥⑦⑧⑨⓪+-/*.,!?_#+",
-            "super": " ᵃᵇᶜᵈᵉᶠᵍʰᶦʲᵏˡᵐⁿᵒᵖᵠʳˢᵗᵘᵛʷˣʸᶻᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᵠᴿˢᵀᵁⱽᵂˣˣʸᶻʸᶻ¹²³⁴⁵⁶⁷⁸⁹⁰⁺⁻/*.,!?_#⁺",
-            "tiny": " ᴀʙᴄᴅᴇғɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢABCDEFGHIJKLMNOPQRSTUVWXXYZYZ1234567890+-/*.,!?_#+",
-            "fraktur": " 𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ1234567890+-/*.,!?_#+",
+            "nice": " 𝒶𝒷𝒸𝒹𝑒𝒻𝑔𝒽𝒾𝒿𝓀𝓁𝓂𝓃𝑜𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏𝒜𝐵𝒞𝒟𝐸𝐹𝒢𝐻𝐼𝒥𝒦𝐿𝑀𝒩𝒪𝒫𝒬𝑅𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵𝟣𝟤𝟥𝟦𝟧𝟨𝟩𝟪𝟫𝟢"
+                    "+-/*.,!?_#+",
+            "mono": " 𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝟷𝟸𝟹𝟺𝟻"
+                    "𝟼𝟽𝟾𝟿𝟶+-/*.,!?_#+",
+            "circle": " ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩⒶⒷⒸⒹⒺ"
+                      "ⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏ①②③④⑤⑥⑦⑧⑨⓪"
+                      "+-/*.,!?_#+",
+            "super": " ᵃᵇᶜᵈᵉᶠᵍʰᶦʲᵏˡᵐⁿᵒᵖᵠʳˢᵗᵘᵛʷˣʸᶻᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᵠᴿˢᵀᵁⱽᵂˣˣʸᶻʸᶻ"
+                     "¹²³⁴⁵⁶⁷⁸⁹⁰⁺⁻/*.,!?_#⁺",
+            "tiny": " ᴀʙᴄᴅᴇғɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢABCDEFGHIJKLMNOPQRSTUVWXXYZYZ1"
+                    "234567890+-/*.,!?_#+",
+            "fraktur": " 𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ123456"
+                       "7890+-/*.,!?_#+",
         }
-        normal_font = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890+-/*.,!?_#+"
+        normal_font = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" \
+                      "1234567890+-/*.,!?_#+"
 
         if content.split (" ")[0] not in fonts:
             return "I don't know that font! Do `help font` to learn more."
@@ -208,17 +231,21 @@ class Bot (discord.Client):
     # TODO delete poll
 
     async def start_poll (self, content: str, message: discord.Message):
-        content = content.replace ("@everyone", "@ everyone").replace ("@here", "@ here")
+        content = content.replace ("@everyone", "@ everyone").replace ("@here",
+                                                                       "@ here")
         if message.guild is None:
             return "Can't do polls in DMs."
         else:
             if not self.configs[message.guild.id].polls_enabled:
                 return "Polls are disabled. Contact an admin."
             if self.configs[message.guild.id].poll_channel == -1:
-                self.configs[message.guild.id].poll_channel = (await message.guild.create_text_channel ("polls")).id
-            channel: discord.TextChannel = message.guild.get_channel (self.configs[message.guild.id].poll_channel)
+                self.configs[message.guild.id].poll_channel = (
+                    await message.guild.create_text_channel ("polls")).id
+            channel: discord.TextChannel = message.guild.get_channel (
+                self.configs[message.guild.id].poll_channel)
             msg: discord.Message = (
-                await channel.send (content = content + " (by {0})".format (message.author.mention)))
+                await channel.send (content = content + " (by {0})".format (
+                    message.author.mention)))
             await msg.add_reaction (u"\U0001F53C")
             await msg.add_reaction (u"\U0001F53D")
 
@@ -242,27 +269,42 @@ class Bot (discord.Client):
     }
 
     command_help = [
-        [["capify", "aA", "Aa"], "{0} <text>` - cApItAlIzEs given text in a fun way."],
-        [["spoilerize", "|"], "{0} <text>` - Surrounds each letter in the text with a spoiler (\"||h||||i||||!||\")."],
-        [["help", "?"], "{0} [command]` - Displays this help or help about a specific command."],
+        [["capify", "aA", "Aa"],
+         "{0} <text>` - cApItAlIzEs given text in a fun way."],
+        [["spoilerize", "|"],
+         "{0} <text>` - Surrounds each letter in the text with a spoiler "
+         "(\"||h||||i||||!||\")."],
+        [["help", "?"],
+         "{0} [command]` - Displays this help or help about a specific "
+         "command."],
         [["prefix"],
-         "{0} <prefix>` - Changes the prefix serverwide. Does not work in DMs (yet). Can be reset with `++pda_reset_prefix`."],
+         "{0} <prefix>` - Changes the prefix serverwide. Does not work in "
+         "DMs (yet). Can be reset with `++pda_reset_prefix`."],
         [["thanks"], "{0}` - Thank the bot for its hard work!"],
         [["coinflip"], "{0}` - Flips a coin (randomly gives Heads or Tails)."],
-        [["rng"], "{0} <min> <max>` - Random number generator - returns a number between `min` and `max`!"],
+        [["rng"],
+         "{0} <min> <max>` - Random number generator - returns a number "
+         "between `min` and `max`!"],
         [["font"],
-         "{0} <fontname> <text>` - Turns text into text of a different font! Avaliable fonts: nice, mono, super, circle, tiny, fraktur"]
+         "{0} <fontname> <text>` - Turns text into text of a different font! "
+         "Avaliable fonts: nice, mono, super, circle, tiny, fraktur"]
     ]
 
     async def on_ready (self):
-        log ('Logged on as {0} in guilds: {1}'.format (self.user, self.guilds_list_str (self.guilds)))
+        log ('Logged on as {0} in guilds: {1}'.format (self.user,
+                                                       self.guilds_list_str (
+                                                           self.guilds)))
         self.load_configs ()
         for guild in self.guilds:
             if guild.id not in self.configs:
-                log ("[?] No config for \"" + guild.name + "\" found - creating config")
+                log (
+                    "[?] No config for \"" + guild.name + "\" found - creating "
+                                                          "config")
                 self.configs[guild.id] = Config ()
             else:
-                log ("[OK] Config for \"" + guild.name + "\" found - prefix \"" + self.configs[guild.id].prefix + "\"")
+                log (
+                    "[OK] Config for \"" + guild.name + "\" found - prefix \"" +
+                    self.configs[guild.id].prefix + "\"")
         self.save_configs ()
 
     async def on_message (self, message):
@@ -279,29 +321,45 @@ class Bot (discord.Client):
                 magic_str = prefix + _c + " "
                 if message.content.startswith (magic_str):
                     await message.channel.send (
-                        content = (await _fn (self, message.content[len (magic_str):], message)))
+                        content = (
+                            await _fn (self, message.content[len (magic_str):],
+                                       message)))
                     break
                 elif message.content.startswith (prefix + _c):
                     await message.channel.send (
-                        content = (await _fn (self, message.content[len (magic_str) - 1:], message)))
+                        content = (await _fn (self, message.content[
+                                                    len (magic_str) - 1:],
+                                              message)))
                     break
 
         if message.content.startswith ("++pda_reset_prefix"):
             if message.guild is None:
-                await message.channel.send (content = "Cannot reset prefix for DMs.")
+                await message.channel.send (
+                    content = "Cannot reset prefix for DMs.")
             else:
                 if not message.author.guild_permissions.administrator:
-                    await message.channel.send (content = "Must be administrator to use. Sorry!")
+                    await message.channel.send (
+                        content = "Must be administrator to use. Sorry!")
                 else:
                     self.configs[message.guild.id].prefix = Config ().prefix
-                    await message.channel.send (content = "Prefix reset to " + Config ().prefix)
+                    await message.channel.send (
+                        content = "Prefix reset to " + Config ().prefix)
 
         if has_prefix:
-            log ('Message from {0.author} in \"{0.channel}\": \"{0.content}\"'.format (message))
+            log (
+                'Message from {0.author} in \"{0.channel}\": \"{0.content}\"'
+                    .format (message))
 
         if message.author == self.user:
             log ('Message from [this bot]: \"{0.content}\"'.format (message))
         self.save_configs ()
+
+    async def on_message_delete (self, message: discord.Message):
+        log ("Message by {0.author.id} ({0.author}) deleted: \"{0.content}\"".format (message))
+
+    async def on_message_edit (self, before: discord.Message, after: discord.Message):
+        log ("Message by {1.author.id} ({1.author}) edited:\nbefore:\n\"{0.content}" \
+             "\"\nafter:\n\"{1.content}\"".format (before, after))
 
     async def on_connect (self):
         log ("Connected")
@@ -314,20 +372,28 @@ class Bot (discord.Client):
         log ("Resumed")
 
     async def on_member_join (self, member: discord.Member):
-        log ("Member" + str (member.id) + "(" + str (member.display_name) + ") joined")
+        log ("Member" + str (member.id) + "(" + str (
+            member.display_name) + ") joined")
 
     async def on_member_remove (self, member: discord.Member):
-        log ("Member" + str (member.id) + "(" + str (member.display_name) + ") left")
+        log ("Member" + str (member.id) + "(" + str (
+            member.display_name) + ") left")
 
-    async def on_member_update (self, before: discord.Member, after: discord.Member):
-        log ("Member update: " + str (after) + "\n\t" + str (before.status) + "\n\t" + str (
-            before.activity) + "\n\t" + str (before.nick) + "\n\t" + str (len (before.roles)) +
-             "\nNow:\n\t" + str (after.status) + "\n\t" + str (after.activity) + "\n\t" + str (
+    async def on_member_update (self, before: discord.Member,
+                                after: discord.Member):
+        log ("Member update: " + str (after) + "\n\t" + str (
+            before.status) + "\n\t" + str (
+            before.activity) + "\n\t" + str (before.nick) + "\n\t" + str (
+            len (before.roles)) +
+             "\nNow:\n\t" + str (after.status) + "\n\t" + str (
+            after.activity) + "\n\t" + str (
             after.nick) + "\n\t" + str (len (after.roles)))
 
     async def on_user_update (self, before: discord.User, after: discord.User):
-        log ("User update: " + str (after) + "\n\t" + str (before.name) + "\n\t" + str (
-            before.discriminator) + "\nNow:\n\t" + str (after.name) + "\n\t" + str (after.discriminator))
+        log ("User update: " + str (after) + "\n\t" + str (
+            before.name) + "\n\t" + str (
+            before.discriminator) + "\nNow:\n\t" + str (
+            after.name) + "\n\t" + str (after.discriminator))
 
 
 while True:
