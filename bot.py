@@ -247,6 +247,7 @@ class Bot (discord.Client):
                     message.author.mention)))
             await msg.add_reaction (u"\U0001F53C")
             await msg.add_reaction (u"\U0001F53D")
+            await message.delete () # remove original message (requested by users)
 
     commands = {
         "capify": capify,
