@@ -33,6 +33,7 @@
 import discord
 from datetime import datetime
 import random
+import sys
 
 
 class Config:
@@ -49,7 +50,7 @@ def time_str ():
 
 def log (msg):
     time = time_str ()
-    print (time + " [LOG] " + str (msg))
+    # print (time + " [LOG] " + str (msg))
     print (time + " [LOG] " + str (msg), file = open ("log.txt", "a"))
 
 class Bot (discord.Client):
@@ -99,7 +100,10 @@ class Bot (discord.Client):
     def load_configs (self):
         # {discord.Guild.id, Config}
         f = open ("configs.data", "r")
-        for line in f:
+        for _line in f:
+            line = _line.strip ()
+            if line == "":
+                continue
             _id = int (line.split (':')[0])
             self.configs[_id] = Config ()
             self.configs[_id].prefix = line.split (':')[1].split (',')[0]
@@ -149,7 +153,6 @@ class Bot (discord.Client):
         if message.guild is None:
             return "Must be in a server."
         else:
-            # TODO must be admin
             if not message.author.guild_permissions.administrator:
                 return "Must be administrator to use. Sorry!"
             # must mention a channel
@@ -308,7 +311,7 @@ class Bot (discord.Client):
         self.save_configs ()
 
     async def on_message (self, message):
-        # log ('Message from {0.author}: \"{0.content}\"'.format (message))
+        log ('{0.guild}: Message from {0.author} in {0.channel.name}: \"{0.content}\"'.format (message))
         prefix = ""
         has_prefix = False
         if message.guild is not None:
@@ -379,6 +382,7 @@ class Bot (discord.Client):
         log ("Member" + str (member.id) + "(" + str (
             member.display_name) + ") left")
 
+""" 
     async def on_member_update (self, before: discord.Member,
                                 after: discord.Member):
         log ("Member update: " + str (after) + "\n\t" + str (
@@ -394,10 +398,11 @@ class Bot (discord.Client):
             before.name) + "\n\t" + str (
             before.discriminator) + "\nNow:\n\t" + str (
             after.name) + "\n\t" + str (after.discriminator))
-
+"""
 
 while True:
-    log ("Looped bot launch")
-    client = Bot ()
-    with open ("TOKEN", "r") as f:
-        client.run (f.readline ())
+    try:
+        with open ("TOKEN", "r") as f:
+            Bot ().run (f.readline ().strip ())
+    except Exception as e:
+        log ("~~~ EXCEPTION:", e)
