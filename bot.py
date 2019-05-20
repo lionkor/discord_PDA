@@ -220,20 +220,20 @@ class Bot (discord.Client):
         log (new_content)
         return new_content
 
-# 0 = thing to compliment
-# 1 = user mention
-praises_first = [
-        "I really love your {0}, {1}!", 
+    # 0 = thing to compliment
+    # 1 = user mention
+    praises_first = [
+        "I really love your {0}, {1}!",
         "Damn, {1}, I love your {0} so much :O",
         "Your {0} makes my heart melt omg {1}",
         "Ay {1}, I  a d o r e  your {0} <3",
         "{1}, you have the nicest {1}!!"
         # TODO add more
-]
+    ]
 
-praises_second = [
+    praises_second = [
         "eyes", "hair", "voice", "way of speaking",
-]
+    ]
 
 
     async def praise (self, content: str, message: discord.Message):
