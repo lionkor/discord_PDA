@@ -227,7 +227,7 @@ class Bot (discord.Client):
         "Damn, {1}, I love your {0} so much :O",
         "Your {0} makes my heart melt omg {1}",
         "Ay {1}, I  a d o r e  your {0} <3",
-        "{1}, you have the nicest {1}!!"
+        "{1}, you have the nicest {0}!!"
         # TODO add more
     ]
 
@@ -239,9 +239,9 @@ class Bot (discord.Client):
     async def praise (self, content: str, message: discord.Message):
         if len (message.mentions) == 0:
             return "Please metion someone that should be praised"
-        _first : str  = random.choice (praise_first)  # main part of the message
-        _second : str = random.choice (praise_secons) # thing to compliment
-        return _first.format (second, message.mentions[0])
+        _first : str  = random.choice (self.praises_first)  # main part of the message
+        _second : str = random.choice (self.praises_second) # thing to compliment
+        return _first.format (_second, message.mentions[0].mention)
 
     async def toggle_polls (self, content: str, message: discord.Message):
         if message.guild is not None:
