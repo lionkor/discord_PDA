@@ -34,7 +34,7 @@ import discord
 from datetime import datetime
 import random
 import sys
-
+import calc # my own calculator module
 
 class Config:
     prefix = "+"
@@ -220,6 +220,29 @@ class Bot (discord.Client):
         log (new_content)
         return new_content
 
+# 0 = thing to compliment
+# 1 = user mention
+praises_first = [
+        "I really love your {0}, {1}!", 
+        "Damn, {1}, I love your {0} so much :O",
+        "Your {0} makes my heart melt omg {1}",
+        "Ay {1}, I  a d o r e  your {0} <3",
+        "{1}, you have the nicest {1}!!"
+        # TODO add more
+]
+
+praises_second = [
+        "eyes", "hair", "voice", "way of speaking",
+]
+
+
+    async def praise (self, content: str, message: discord.Message):
+        if len (message.mentions) == 0:
+            return "Please metion someone that should be praised"
+        _first : str  = random.choice (praise_first)  # main part of the message
+        _second : str = random.choice (praise_secons) # thing to compliment
+        return _first.format (second, message.mentions[0])
+
     async def toggle_polls (self, content: str, message: discord.Message):
         if message.guild is not None:
             if not message.author.guild_permissions.administrator:
@@ -252,6 +275,16 @@ class Bot (discord.Client):
             await msg.add_reaction (u"\U0001F53D")
             await message.delete () # remove original message (requested by users)
 
+    async def calculate (self, content: str, message: discord.Message):
+        await message.channel.send (content=content + " = " + calc.calc (content))
+
+    async def hello (self, content: str, message: discord.Message):
+        prefix = Config ().prefix
+        if message.guild is not None:
+            prefix = self.configs[message.guild.id].prefix
+        await message.channel.send (content="Hello, {0}! I am this server's **P**ersonal **D**igital **A**ssistant, PDA. You can get a list of commands by typing `{1}help`. My author is Lion#3620, so talk to him if you have any feature requests or problems, or use the poll below! \n\nMy code is here: <https://github.com/lionkor/discord_PDA>. \n\nHere's a short poll about me: <https://forms.gle/WeJ9JqDABEsAyVhL8>."
+                .format (message.author.display_name, prefix))
+
     commands = {
         "capify": capify,
         "aA": capify,
@@ -268,6 +301,11 @@ class Bot (discord.Client):
         "vote": setup_vote,  # admin only
         "polls": toggle_polls,  # admin only
         "poll": start_poll,
+        "calc": calculate,
+        "calculate": calculate,
+        "c": calculate,
+        "hello": hello,
+        "praise": praise,
         # "lock_vote": lock_vote, # admin only
     }
 
@@ -290,7 +328,9 @@ class Bot (discord.Client):
          "between `min` and `max`!"],
         [["font"],
          "{0} <fontname> <text>` - Turns text into text of a different font! "
-         "Avaliable fonts: nice, mono, super, circle, tiny, fraktur"]
+         "Avaliable fonts: nice, mono, super, circle, tiny, fraktur"],
+        [["calculate", "calc", "c"], "{0} <expression>` - Attempts to calculate the given expression. Examples: `2 * 53`, `3444.343 / (32 + 2.2)`"],
+        [["hello"], "{0}` - Displays some information about this bot."],
     ]
 
     async def on_ready (self):
