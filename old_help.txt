@@ -1,0 +1,25 @@
+# this is the old help list. It's shitty, don't even think about using it.
+
+    command_help = [
+        [["capify", "aA", "Aa"],
+         "{0}` `<text>` - cApItAlIzEs given text in a fun way."],
+        [["spoilerize", "|"],
+         "{0}` `<text>` - Surrounds each letter in the text with a spoiler "
+         "(\"||h||||i||||!||\")."],
+        [["help", "?"],
+         "{0}` `[command]` - Displays this help or help about a specific "
+         "command."],
+        [["prefix"],
+         "{0}` `<prefix>` - Changes the prefix serverwide. Does not work in "
+         "DMs (yet). Can be reset with `++pda_reset_prefix`."],
+        [["thanks"], "{0}` `[message]` - Thank the bot for its hard work! The message will be stored for eternity, too!"],
+        [["coinflip"], "{0}` - Flips a coin (randomly gives Heads or Tails)."],
+        [["rng"],
+         "{0}` `<min> <max>` - Random number generator - returns a number "
+         "between `min` and `max`!"],
+        [["font"],
+         "{0}` `<fontname> <text>` - Turns text into text of a different font! "
+         "Avaliable fonts: nice, mono, super, circle, tiny, fraktur"],
+        [["calculate", "calc", "c"], "{0}` `<expression>` - Calculates the given expression. Accepts common operators (`+`, `-`, `*`, `/`, `^`), functions (`sqrt(x)`, `sin(x)`, etc.), equality comparisons (`==`, `!=`), relational comparisons (`<`, `>`, `<=`, `>=`), bitwise operations (`or`, `and`, `xor`, `<<`, `>>`), nested parentheses (`2 (1.05 * (2 / 4))`)"],
+        [["hello"], "{0}` - Displays some information about this bot."],
+    ]

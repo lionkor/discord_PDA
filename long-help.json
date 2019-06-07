@@ -1,0 +1,98 @@
+{
+  "capify": {
+    "alias": "capify, aA, Aa",
+    "args": "<text>",
+    "expl": "Makes text that alternates betweem UPPER and lower case, lIkE sO. Can be used in DMs, too.",
+    "exmp": "`capify I'm so smart` => `i'm sO SmArT`"
+  },
+  "aA": {
+    "alias": "capify, aA, Aa",
+    "args": "<text>",
+    "expl": "Makes text that alternates betweem UPPER and lower case, lIkE sO. Can be used in DMs, too.",
+    "exmp": "`capify I'm so smart` => `i'm sO SmArT`"
+  },
+  "Aa": {
+    "alias": "capify, aA, Aa",
+    "args": "<text>",
+    "expl": "Makes text that alternates betweem UPPER and lower case, lIkE sO. Can be used in DMs, too.",
+    "exmp": "`capify I'm so smart` => `i'm sO SmArT`"
+  },
+  "spoilerize": {
+    "alias": "spoilerize, |",
+    "args": "<text>",
+    "expl": "Puts discord's spoilers around each character of the text, which is really annoying. Copy & paste the output to see the effect!",
+    "exmp": "`spoilerize gamer` => `||g||||a||||m||||e||||r||` => \"||g||||a||||m||||e||||r||\""
+  },
+  "|": {
+    "alias": "spoilerize, |",
+    "args": "<text>",
+    "expl": "Puts discord's spoilers around each character of the text, which is really annoying. Copy & paste the output to see the effect!",
+    "exmp": "`spoilerize gamer` => `||g||||a||||m||||e||||r||` => \"||g||||a||||m||||e||||r||\""
+  },
+  "help": {
+    "alias": "help, ?",
+    "args": "[command]",
+    "expl": "Displays all commands, or help for a specific command. Works in DMs, too!",
+    "exmp": "`help c`"
+  },
+  "?": {
+    "alias": "help, ?",
+    "args": "[command]",
+    "expl": "Displays all commands, or help for a specific command. Works in DMs, too!",
+    "exmp": "`help c`"
+  },
+  "prefix": {
+    "alias": "prefix",
+    "args": "<new prefix>",
+    "expl": "Changes bot's prefix. If it messes up because of other bots with the same prefix, use `++pda_reset_prefix` to reset it to `+`, or ask the Author (Lion#3620) for help.",
+    "exmp": "`prefix $$`"
+  },
+  "thanks": {
+    "alias": "thanks",
+    "args": "[message]",
+    "expl": "Thanks the bot with an optional message. This thank you message will be stored as a (hopefully) happy memory!",
+    "exmp": "`thanks mr bot man`"
+  },
+  "coinflip": {
+    "alias": "coinflip",
+    "args": " ",
+    "expl": "Flips a coin (Heads or Tails). It's random, even if you think it's rigged.",
+    "exmp": "`coinflip` => Heads!"
+  },
+  "rng": {
+    "alias": "rng",
+    "args": "<min> <max>",
+    "expl": "Generates a number between 'min' and 'max', where both should be whole numbers.",
+    "exmp": "`rng 5 10` => 7"
+  },
+  "font": {
+    "alias": "font",
+    "args": "<fontname> <text>",
+    "expl": "Makes pretty text! Fonts that you can use: `nice`, `mono`, `super`, `circle`, `tiny`, `fraktur`",
+    "exmp": "`font fraktur OwO` => 𝔒𝔴𝔒"
+  },
+  "calculate": {
+    "alias": "calculate, calc, c",
+    "args": "<calculation>",
+    "expl": "Calculates an expression. This uses a custom algorithm. It can process very complicated expressions, which may contain `+ - * / ^` as operators, parentheses `(``)`, functions `sqrt` (square-root), `sin`, `cos`, and the constant `pi`.",
+    "exmp": "`c (15.8 / (3 / 4)) ^ 2` => `443.8044444444444`"
+  },
+  "calc": {
+    "alias": "calculate, calc, c",
+    "args": "<calculation>",
+    "expl": "Calculates an expression. This uses a custom algorithm. It can process very complicated expressions, which may contain `+ - * / ^` as operators, parentheses `(``)`, functions `sqrt` (square-root), `sin`, `cos`, and the constant `pi`.",
+    "exmp": "`c (15.8 / (3 / 4)) ^ 2` => `443.8044444444444`"
+  },
+  "c": {
+    "alias": "calculate, calc, c",
+    "args": "<calculation>",
+    "expl": "Calculates an expression. This uses a custom algorithm. It can process very complicated expressions, which may contain `+ - * / ^` as operators, parentheses `(``)`, functions `sqrt` (square-root), `sin`, `cos`, and the constant `pi`.",
+    "exmp": "`c (15.8 / (3 / 4)) ^ 2` => `443.8044444444444`"
+  },
+  "hello": {
+    "alias": "hello",
+    "args": " ",
+    "expl": "Displays some information about this bot, like who made it, where its source code can be found (I'm Open-Source (MIT)), and a poll!",
+    "exmp": "`hello`"
+  }
+}

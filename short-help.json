@@ -1,0 +1,52 @@
+{
+  "capify": {
+    "alias": "aA, Aa",
+    "args": "<text>",
+    "expl": "WeIrD cApItAlIsAtIoN"
+  },
+  "spoilerize": {
+    "alias": "|",
+    "args": "<text>",
+    "expl": "Annoying spoilers (||h||||i||||!||)"
+  },
+  "help": {
+    "alias": "?",
+    "args": "[command]",
+    "expl": "Displays all commands, or help for a specific command"
+  },
+  "prefix": {
+    "alias": "",
+    "args": "<new prefix>",
+    "expl": "Changes bot's prefix"
+  },
+  "thanks": {
+    "alias": "",
+    "args": "[message]",
+    "expl": "Thanks the bot with an optional message"
+  },
+  "coinflip": {
+    "alias": "",
+    "args": "",
+    "expl": "Flips a coin (Heads or Tails)"
+  },
+  "rng": {
+    "alias": "",
+    "args": "<min> <max>",
+    "expl": "Generates a number between 'min' and 'max'"
+  },
+  "font": {
+    "alias": "",
+    "args": "<fontname> <text>",
+    "expl": "Makes pretty text"
+  },
+  "calculate": {
+    "alias": "calc, c",
+    "args": "<calculation>",
+    "expl": "Calculates an expression"
+  },
+  "hello": {
+    "alias": "",
+    "args": "",
+    "expl": "Displays some information"
+  }
+}

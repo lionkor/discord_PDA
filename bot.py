@@ -49,21 +49,69 @@ def log (msg):
 kprefix = "prefix"
 kpolls_enabled = "polls_enabled"
 kpoll_channel = "poll_channel"
+kdisabled_commands = "disabled_commands"
 
 class Bot (discord.Client):
     default_prefix = "+"
     default_polls_enabled = False
     default_poll_channel = -1
+    default_disabled_commands = [] # TODO deprecate polls_enabled in favor of this
 
     default_config = {
         kprefix : default_prefix,
         kpolls_enabled : default_polls_enabled,
         kpoll_channel : default_poll_channel,
+        kdisabled_commands : default_disabled_commands,
     }
 
     configs: {discord.Guild.id : {}} = dict ()
 
+    async def display_help (self, msg: str, message: discord.Message):
+        # use long-help.json for per-command help, otherwise short-help.json.
+        # format:
+        # command: {alias: "..., ...", args: "<...>", expl: "..."}
+
+        prefix = self.default_prefix
+        if message.guild is not None:
+            prefix = self.configs[message.guild.id][kprefix]
+
+        with open ("short-help.json", "r") as shelp:
+            obj: {str : dict} = json.load (shelp)
+
+        if len (msg) != 0:
+            with open ("long-help.json", "r") as lhelp:
+                obj: {str: dict} = json.load (lhelp)
+            # user is asking for detailed help
+            if msg not in obj.keys ():
+                return f"I can't find any help for command `{msg.replace ('`', '')}`. Type `{prefix}help` for a list of commands."
+            else:
+                return f"Help for `{msg}`:\n" \
+                    f"**Aliases**: {obj[msg]['alias']}\n" \
+                    f"**Arguments**: {obj[msg]['args']}\n" \
+                    f"**Explanation**: {obj[msg]['expl']}\n" \
+                    f"**Example**: {obj[msg]['exmp']}\n" \
+                    f"*(note: don't actually type the `<>` in the arguments)*"
+
+        fullhelp = "**PDA Help**\n" \
+                   f"\n**Prefix is `{prefix}`.**\n" \
+            f"For more detailed help about a command, type `{prefix}help command`.\n\n"
+
+        for command, opt in obj.items ():
+            if opt["args"] != "":
+                fullhelp += "`" + prefix + command + "`  `" + opt["args"] + "` -- " + opt['expl']
+            else:
+                fullhelp += "`" + prefix + command + "` -- " + opt['expl']
+            if opt["alias"] != "":
+                fullhelp += " - has aliases: " + opt["alias"]
+            fullhelp += "\n"
+
+
+        return fullhelp
+
     async def capify (self, msg: str, message: discord.Message):
+        if len (msg) == 0:
+            return await self.display_help (msg, message)
+
         msg = msg.replace ("@everyone", "@ everyone").replace ("@here",
                                                                "@ here")
         result = ""
@@ -83,6 +131,9 @@ class Bot (discord.Client):
             return f"{result}"
 
     async def spoilerize (self, msg: str, message: discord.Message):
+        if len (msg) == 0:
+            return await self.display_help (msg, message)
+
         msg = msg.replace ("@everyone", "@ everyone").replace ("@here",
                                                                "@ here")
         result = ""
@@ -110,10 +161,14 @@ class Bot (discord.Client):
             self.configs[int (k)] = {
                 kprefix : d[kprefix],
                 kpolls_enabled : d[kpolls_enabled],
-                kpoll_channel : d[kpoll_channel]
+                kpoll_channel : d[kpoll_channel],
+                kdisabled_commands : d[kdisabled_commands]
             }
 
     async def set_prefix (self, msg: str, message: discord.Message):
+        if len (msg) == 0:
+            return await self.display_help ("prefix", message)
+
         if message.guild is None:
             return "Setting the prefix in DMs is not yet supported."
         else:
@@ -122,28 +177,6 @@ class Bot (discord.Client):
             self.configs[message.guild.id][kprefix] = msg
             return "Prefix set to `" + self.configs[
                 message.guild.id][kprefix] + "`"
-
-    async def display_help (self, msg: str, message: discord.Message):
-        log ("help: " + msg)
-        prefix = self.default_prefix
-        if message.guild is not None:
-            prefix = self.configs[message.guild.id][kprefix]
-        if len (msg) > 0:
-            for _command in self.command_help:
-                for _item in _command[0]:
-                    if msg == _item:
-                        return "`" + prefix + _command[1].format (_item)
-            return "command `{0}` not found.".format (msg)
-        else:
-            fullhelp = "\t\t**PDA Help**\n\n" \
-                       "_To use the following commands, " \
-                       "precede them with `{0}`._\n\n".format (prefix)
-            for _command in self.command_help:
-                _sss = ""
-                for _item in _command[0]:
-                    _sss += prefix + _item + "`/`"
-                fullhelp += "`" + _command[1].format (_sss.strip ("`/`")) + "\n"
-            return fullhelp
 
     async def thank (self, content, message: discord.Message):
         with open ("thanks.txt", "a") as f:
@@ -172,6 +205,7 @@ class Bot (discord.Client):
             return "Tails!"
 
     async def rng (self, content: str, message: discord.Message):
+        # TODO help on no args given
         numbers = content.split (" ")
         if len (numbers) != 2:
             return "Incorrect number of arguments! I only need minimum and " \
@@ -292,10 +326,46 @@ class Bot (discord.Client):
         return f"Hello, {message.author.display_name}! I am this server's **P**ersonal **D**igital **A**ssistant, PDA. You can get a list of commands by typing `{prefix}help`. My author is **Lion#3620**, so talk to him if you have any feature requests or problems, or use the poll below! \n\nMy code is here: <https://github.com/lionkor/discord_PDA>. \n\nHere's a short poll about me: <https://forms.gle/WeJ9JqDABEsAyVhL8>."
 
     async def enable (self, content: str, message: discord.Message):
-        pass # TODO
+        if message.guild is not None:
+            if not message.author.guild_permissions.administrator:
+                return "Must be administrator to use. Sorry!"
+        if message.guild is None:
+            return "Can't disable commands in DMs."
+        if content not in self.commands:
+            return f"I do not know the command `{content}`."
+        if content not in self.configs[message.guild.id][kdisabled_commands]:
+            return f"`{content}` is not disabled."
+        ret = "Enabled the following commands: "
+        disable_fn = self.commands[content]
+        for s, fn in self.commands.items ():
+            if fn == disable_fn:
+                self.configs[message.guild.id][kdisabled_commands].remove (s)
+                ret += "`" + s + "`, "
+        return ret.rstrip (", ") + "."
 
     async def disable (self, content: str, message: discord.Message):
-        pass # TODO
+        if message.guild is not None:
+            if not message.author.guild_permissions.administrator:
+                return "Must be administrator to use. Sorry!"
+        if message.guild is None:
+            return "Can't disable commands in DMs."
+        if content not in self.commands:
+            return f"I do not know the command `{content}`."
+        if content == "disable" or content == "enable":
+            return f"For safety reasons it is not allowed to disable `{content}`."
+        if content in self.configs[message.guild.id][kdisabled_commands]:
+            return f"`{content}` and all aliases of it are already disabled."
+        ret = "Disabled the following commands: "
+        disable_fn = self.commands[content]
+        for s, fn in self.commands.items ():
+            if fn == disable_fn:
+                self.configs[message.guild.id][kdisabled_commands].append (s)
+                ret += "`" + s + "`, "
+        return ret.rstrip (", ") + "."
+
+
+    async def invite (self, content: str, message: discord.Message):
+        return f"To invite me to your server, go here: <https://discordapp.com/oauth2/authorize?client_id=566669481204514818&scope=bot&permissions=805694679>"
 
     commands = {
         "capify": capify,
@@ -318,33 +388,10 @@ class Bot (discord.Client):
         "c": calculate,
         "hello": hello,
         "praise": praise,
+        "invite" : invite,
         "enable" : enable,  # admin only
         "disable": disable,  #admin only
     }
-
-    command_help = [
-        [["capify", "aA", "Aa"],
-         "{0}` `<text>` - cApItAlIzEs given text in a fun way."],
-        [["spoilerize", "|"],
-         "{0}` `<text>` - Surrounds each letter in the text with a spoiler "
-         "(\"||h||||i||||!||\")."],
-        [["help", "?"],
-         "{0}` `[command]` - Displays this help or help about a specific "
-         "command."],
-        [["prefix"],
-         "{0}` `<prefix>` - Changes the prefix serverwide. Does not work in "
-         "DMs (yet). Can be reset with `++pda_reset_prefix`."],
-        [["thanks"], "{0}` `[message]` - Thank the bot for its hard work! The message will be stored for eternity, too!"],
-        [["coinflip"], "{0}` - Flips a coin (randomly gives Heads or Tails)."],
-        [["rng"],
-         "{0}` `<min> <max>` - Random number generator - returns a number "
-         "between `min` and `max`!"],
-        [["font"],
-         "{0}` `<fontname> <text>` - Turns text into text of a different font! "
-         "Avaliable fonts: nice, mono, super, circle, tiny, fraktur"],
-        [["calculate", "calc", "c"], "{0}` `<expression>` - Calculates the given expression. Accepts common operators (`+`, `-`, `*`, `/`, `^`), functions (`sqrt(x)`, `sin(x)`, etc.), equality comparisons (`==`, `!=`), relational comparisons (`<`, `>`, `<=`, `>=`), bitwise operations (`or`, `and`, `xor`, `<<`, `>>`), nested parentheses (`2 (1.05 * (2 / 4))`)"],
-        [["hello"], "{0}` - Displays some information about this bot."],
-    ]
 
     async def on_ready (self):
         log ('Logged on as {0} in guilds: {1}'.format (self.user,
@@ -409,6 +456,7 @@ class Bot (discord.Client):
         if message.author == self.user:
             log ('Message from [this bot]: \"{0.content}\"'.format (message))
         self.save_configs ()
+        self.load_configs () # FIXME this is not the best way, but it fixes joining and not having a prefix configured
 
     async def on_message_delete (self, message: discord.Message):
         log ("Message by {0.author.id} ({0.author}) deleted: \"{0.content}\"".format (message))
