@@ -73,7 +73,7 @@ class Bot (discord.Client):
             # get server prefix from config
             return self.configs[message.guild.id][kprefix]
 
-    async def display_help (self, msg: str, message: discord.Message):
+    async def com_help (self, msg: str, message: discord.Message):
         # use long-help.json for per-command help, otherwise short-help.json
 
         prefix = self.get_prefix (message)
@@ -111,9 +111,9 @@ class Bot (discord.Client):
 
         return fullhelp
 
-    async def capify (self, msg: str, message: discord.Message):
+    async def com_capify (self, msg: str, message: discord.Message):
         if len (msg) == 0:
-            return await self.display_help (msg, message)
+            return await self.com_help (msg, message)
 
         msg = msg.replace ("@everyone", "@ everyone").replace ("@here",
                                                                "@ here")
@@ -133,9 +133,9 @@ class Bot (discord.Client):
             # no deletion, username in DMs
             return f"{result}"
 
-    async def spoilerize (self, msg: str, message: discord.Message):
+    async def com_spoilerize (self, msg: str, message: discord.Message):
         if len (msg) == 0:
-            return await self.display_help (msg, message)
+            return await self.com_help (msg, message)
 
         msg = msg.replace ("@everyone", "@ everyone").replace ("@here",
                                                                "@ here")
@@ -168,9 +168,9 @@ class Bot (discord.Client):
                 kdisabled_commands : d[kdisabled_commands]
             }
 
-    async def set_prefix (self, msg: str, message: discord.Message):
+    async def com_prefix (self, msg: str, message: discord.Message):
         if len (msg) == 0:
-            return await self.display_help ("prefix", message)
+            return await self.com_help ("prefix", message)
 
         if message.guild is None:
             return "Setting the prefix in DMs is not yet supported."
@@ -181,12 +181,12 @@ class Bot (discord.Client):
             return "Prefix set to `" + self.configs[
                 message.guild.id][kprefix] + "`"
 
-    async def thank (self, content, message: discord.Message):
+    async def com_thanks (self, content, message: discord.Message):
         with open ("thanks.txt", "a") as f:
             f.write (f"{time_str ()} {message.author.id} ({message.author}) thanked me! Custom message: thanks {content}\n")
         return "Noted! I appreciate it :)"
 
-    async def setup_vote (self, content: str, message: discord.Message):
+    async def com_vote (self, content: str, message: discord.Message):
         if message.guild is None:
             return "Must be in a server."
         else:
@@ -201,13 +201,13 @@ class Bot (discord.Client):
             await msg.add_reaction (u"\U0001F53C")
             await msg.add_reaction (u"\U0001F53D")
 
-    async def coinflip (self, content: str, message: discord.Message):
+    async def com_coinflip (self, content: str, message: discord.Message):
         if random.randint (0, 1) == 0:
             return "Heads!"
         else:
             return "Tails!"
 
-    async def rng (self, content: str, message: discord.Message):
+    async def com_rng (self, content: str, message: discord.Message):
         # TODO help on no args given
         numbers = content.split (" ")
         if len (numbers) != 2:
@@ -222,7 +222,7 @@ class Bot (discord.Client):
         return "RNG: " + str (
             random.randint (min (_min, _max), max (_min, _max)))
 
-    async def font (self, content: str, message: discord.Message):
+    async def com_font (self, content: str, message: discord.Message):
         content = content.replace ("@everyone", "@ everyone").replace ("@here",
                                                                        "@ here")
         fonts = {
@@ -272,7 +272,7 @@ class Bot (discord.Client):
         "eyes", "hair", "voice", "way of speaking",
     ]
 
-    async def praise (self, content: str, message: discord.Message):
+    async def com_praise (self, content: str, message: discord.Message):
         if len (message.mentions) == 0:
             return "Please metion someone that should be praised"
         _first : str  = random.choice (self.praises_first)  # main part of the message
@@ -289,7 +289,7 @@ class Bot (discord.Client):
             polls_enabled = self.default_polls_enabled
             return "Polls cannot be toggled in DMs."
 
-    async def start_poll (self, content: str, message: discord.Message):
+    async def com_poll (self, content: str, message: discord.Message):
         content = content.replace ("@everyone", "@ everyone").replace ("@here",
                                                                        "@ here")
         if message.guild is None:
@@ -311,9 +311,9 @@ class Bot (discord.Client):
 
     # TODO setup poll channel set command
 
-    async def calculate (self, content: str, message: discord.Message):
+    async def com_calculate (self, content: str, message: discord.Message):
         if len (content) == 0 or content == "":
-            return await self.display_help ('c', message)
+            return await self.com_help ('c', message)
         try:
             res = calc.evaluate (content)
         except Exception as e:
@@ -322,13 +322,13 @@ class Bot (discord.Client):
             return f"```fix\n{content} = {res}```" # fix would mess up with multiple '='
         return f"```py\n{content} = {res}```"
 
-    async def hello (self, content: str, message: discord.Message):
+    async def com_hello (self, content: str, message: discord.Message):
         prefix = self.default_prefix
         if message.guild is not None:
             prefix = self.configs[message.guild.id][kprefix]
         return f"Hello, {message.author.display_name}! I am this server's **P**ersonal **D**igital **A**ssistant, PDA. You can get a list of commands by typing `{prefix}help`. My author is **Lion#3620**, so talk to him if you have any feature requests or problems, or use the poll below! \n\nMy code is here: <https://github.com/lionkor/discord_PDA>. \n\nHere's a short poll about me: <https://forms.gle/WeJ9JqDABEsAyVhL8>."
 
-    async def enable (self, content: str, message: discord.Message):
+    async def com_enable (self, content: str, message: discord.Message):
         if message.guild is not None:
             if not message.author.guild_permissions.administrator:
                 return "Must be administrator to use. Sorry!"
@@ -346,7 +346,7 @@ class Bot (discord.Client):
                 ret += "`" + s + "`, "
         return ret.rstrip (", ") + "."
 
-    async def disable (self, content: str, message: discord.Message):
+    async def com_disable (self, content: str, message: discord.Message):
         if message.guild is not None:
             if not message.author.guild_permissions.administrator:
                 return "Must be administrator to use. Sorry!"
@@ -367,37 +367,41 @@ class Bot (discord.Client):
         return ret.rstrip (", ") + "."
 
 
-    async def invite (self, content: str, message: discord.Message):
+    async def com_invite (self, content: str, message: discord.Message):
         return f"To invite me to your server, go here: <https://discordapp.com/oauth2/authorize?client_id=566669481204514818&scope=bot&permissions=805694679>"
 
-    async def get_id (self, content, message):
+    async def com_getid (self, content, message):
         import os
         return f"PID: `{os.getpid ()}`"
 
+    async def com_set (self, content: str, message: discord.Message):
+        pass # TODO
+
     commands = {
-        "capify": capify,
-        "aA": capify,
-        "Aa": capify,
-        "spoilerize": spoilerize,
-        "|": spoilerize,
-        "prefix": set_prefix,  # admin only
-        "help": display_help,
-        "?": display_help,
-        "thanks": thank,
-        "coinflip": coinflip,
-        "rng": rng,
-        "font": font,
-        "vote": setup_vote,  # admin only, no help (yet)
-        "poll": start_poll,
-        "calc": calculate,
-        "calculate": calculate,
-        "c": calculate,
-        "hello": hello,
-        "praise": praise,
-        "invite" : invite,
-        "getid" : get_id, # dev only, no help
-        "enable" : enable,  # admin only
-        "disable": disable,  #admin only
+        "capify":     com_capify,
+        "aA":         com_capify,
+        "Aa":         com_capify,
+        "spoilerize": com_spoilerize,
+        "|":          com_spoilerize,
+        "prefix":     com_prefix, # admin only
+        "help":       com_help,
+        "?":          com_help,
+        "thanks":     com_thanks,
+        "coinflip":   com_coinflip,
+        "rng":        com_rng,
+        "font":       com_font,
+        "vote":       com_vote, # admin only, no help (yet)
+        "poll":       com_poll,
+        "calc":       com_calculate,
+        "calculate":  com_calculate,
+        "c":          com_calculate,
+        "hello":      com_hello,
+        "praise":     com_praise,
+        "invite" :    com_invite,
+        "getid" :     com_getid, # dev only, no help
+        "enable" :    com_enable, # admin only
+        "disable":    com_disable, #admin only
+        "set" :       com_set,
         # TODO set command to set different settings, like the poll channel
     }
 
