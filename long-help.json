@@ -42,9 +42,9 @@
     "exmp": "`help c`"
   },
   "prefix": {
-    "alias": "prefix",
+    "alias": "prefix, pda-prefix",
     "args": "<new prefix>",
-    "expl": "Changes bot's prefix. If it messes up because of other bots with the same prefix, use `++pda_reset_prefix` to reset it to `+`, or ask the Author (Lion#3620) for help.",
+    "expl": "Changes bot's prefix. Use `pda-prefix` if you have other bots with `+` as the default prefix and you are changing it for the first time. Use `++pda_reset_prefix` to reset it to `+`.",
     "exmp": "`prefix $$`"
   },
   "thanks": {

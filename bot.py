@@ -31,6 +31,8 @@ import random
 from discord_PDA import calc
 import json
 
+COMMAND_NOT_AVAIL_IN_DMS = "Can't use this command in DMs (yet). If you'd like this feature to be added, contact the developer (`hello` command has more info about that)."
+
 def time_str ():
     dtn = datetime.now ()
     return str (dtn.date ()) + " " + str (dtn.hour) + ":" + str (
@@ -43,24 +45,37 @@ def log (msg):
 
 
 kprefix = "prefix"
-kpolls_enabled = "polls_enabled"
 kpoll_channel = "poll_channel"
 kdisabled_commands = "disabled_commands"
 
 class Bot (discord.Client):
     default_prefix = "+"
-    default_polls_enabled = False
+    default_disabled_commands = []
     default_poll_channel = -1
-    default_disabled_commands = [] # TODO deprecate polls_enabled in favor of this
+    # TODO setting for enable/disable automatic help display
 
     default_config = {
         kprefix : default_prefix,
-        kpolls_enabled : default_polls_enabled,
         kpoll_channel : default_poll_channel,
         kdisabled_commands : default_disabled_commands,
     }
 
     configs: {discord.Guild.id : {}} = dict ()
+
+    def configs_load (self):
+        with open ("cfgs.json", "r") as conf:
+            temp = json.loads (conf.read ())
+        for k, d in temp.items ():
+            # conversion from strings to python objects
+            self.configs[int (k)] = {
+                kprefix : d[kprefix],
+                kpoll_channel : d[kpoll_channel],
+                kdisabled_commands : d[kdisabled_commands]
+            }
+
+    def configs_save (self):
+        with open ("cfgs.json", "w+") as conf:
+            conf.write (json.dumps (self.configs))
 
     def get_prefix (self, message: discord.Message): # string
         """
@@ -93,7 +108,7 @@ class Bot (discord.Client):
                     f"**> __Arguments__**: \n{obj[msg]['args']}\n\n" \
                     f"**> __Explanation__**: \n{obj[msg]['expl']}\n\n" \
                     f"**> __Example__**: \n{obj[msg]['exmp']}\n\n" \
-                    f"*(note: don't actually type the `<>` in the arguments)*"
+                    f"*(note: don't actually type the `<>` and `[]` in the arguments. `<>` means argument is required, `[]` means it's optional.)*"
 
         fullhelp = "**PDA Help**\n" \
                    f"\n**Prefix is `{prefix}`.**\n" \
@@ -113,8 +128,8 @@ class Bot (discord.Client):
 
     async def com_capify (self, msg: str, message: discord.Message):
         if len (msg) == 0:
-            return await self.com_help (msg, message)
-
+            return "Whoops, invalid arguments!\n\n" + (await self.com_help ("capify", message))
+        
         msg = msg.replace ("@everyone", "@ everyone").replace ("@here",
                                                                "@ here")
         result = ""
@@ -128,14 +143,14 @@ class Bot (discord.Client):
         if message.guild is not None:
             # deleting the message (feature requested by users)
             await message.delete ()
-            return f"{message.author.display_name}: {result}"
+            return f"{message.author.mention}**:** {result}"
         else:
             # no deletion, username in DMs
             return f"{result}"
 
     async def com_spoilerize (self, msg: str, message: discord.Message):
         if len (msg) == 0:
-            return await self.com_help (msg, message)
+            return "Whoops, invalid arguments!\n\n" + (await self.com_help ("spoilerize", message))
 
         msg = msg.replace ("@everyone", "@ everyone").replace ("@here",
                                                                "@ here")
@@ -152,46 +167,30 @@ class Bot (discord.Client):
                 result += ", "
         return result
 
-    def save_configs (self):
-        with open ("cfgs.json", "w+") as conf:
-            conf.write (json.dumps (self.configs))
-
-    def load_configs (self):
-        with open ("cfgs.json", "r") as conf:
-            temp = json.loads (conf.read ())
-        for k, d in temp.items ():
-            # conversion from strings to python objects
-            self.configs[int (k)] = {
-                kprefix : d[kprefix],
-                kpolls_enabled : d[kpolls_enabled],
-                kpoll_channel : d[kpoll_channel],
-                kdisabled_commands : d[kdisabled_commands]
-            }
-
     async def com_prefix (self, msg: str, message: discord.Message):
         if len (msg) == 0:
-            return await self.com_help ("prefix", message)
+            return "Whoops, invalid arguments!\n\n" + (await self.com_help ("prefix", message))
 
         if message.guild is None:
-            return "Setting the prefix in DMs is not yet supported."
+            return COMMAND_NOT_AVAIL_IN_DMS
         else:
             if not message.author.guild_permissions.administrator:
-                return "Must be administrator to use. Sorry!"
+                return f"{message.author.mention}, you must be administrator to use. Sorry!"
             self.configs[message.guild.id][kprefix] = msg
             return "Prefix set to `" + self.configs[
                 message.guild.id][kprefix] + "`"
 
     async def com_thanks (self, content, message: discord.Message):
         with open ("thanks.txt", "a") as f:
-            f.write (f"{time_str ()} {message.author.id} ({message.author}) thanked me! Custom message: thanks {content}\n")
-        return "Noted! I appreciate it :)"
+            f.write (f"{time_str ()} {message.author.id} ({message.author}) thanked me in \"{message.channel}\" (guild \"{message.guild}\")! Custom message: thanks {content}\n")
+        return f"Noted! I appreciate it {message.author.mention} :)" # TODO add random emoji
 
-    async def com_vote (self, content: str, message: discord.Message):
+    async def com_vote (self, content: str, message: discord.Message): # refactor
         if message.guild is None:
-            return "Must be in a server."
+            return COMMAND_NOT_AVAIL_IN_DMS
         else:
             if not message.author.guild_permissions.administrator:
-                return "Must be administrator to use. Sorry!"
+                return f"{message.author.mention}, you must be administrator to use. Sorry!"
             # must mention a channel
             if len (message.channel_mentions) == 0:
                 return "Must mention a channel, try again."
@@ -211,8 +210,8 @@ class Bot (discord.Client):
         # TODO help on no args given
         numbers = content.split (" ")
         if len (numbers) != 2:
-            return "Incorrect number of arguments! I only need minimum and " \
-                   "maximum!"
+            return "Whoops, invalid arguments!\n\n" + (await self.com_help ("rng", message))
+
         try:
             _min = int (numbers[0])
             _max = int (numbers[1])
@@ -244,7 +243,7 @@ class Bot (discord.Client):
                       "1234567890+-/*.,!?_#+"
 
         if content.split (" ")[0] not in fonts:
-            return "I don't know that font! Do `help font` to learn more."
+            return "Whoops, invalid arguments!\n\n" + (await self.com_help ("font", message))
         font_data: str = fonts[content.split (" ")[0]]
         new_content = ""
         log (content[content.find (" "):])
@@ -274,32 +273,25 @@ class Bot (discord.Client):
 
     async def com_praise (self, content: str, message: discord.Message):
         if len (message.mentions) == 0:
-            return "Please metion someone that should be praised"
+            return "Please mention someone that should be praised"
         _first : str  = random.choice (self.praises_first)  # main part of the message
         _second : str = random.choice (self.praises_second) # thing to compliment
         return _first.format (_second, message.mentions[0].mention)
 
-    async def toggle_polls (self, content: str, message: discord.Message):
-        if message.guild is not None:
-            if not message.author.guild_permissions.administrator:
-                return "Must be administrator to use. Sorry!"
-            self.configs[message.guild.id][kpolls_enabled] = bool (content)
-            return f"Changed polls enabled to {str(bool(content))}"
-        else:
-            polls_enabled = self.default_polls_enabled
-            return "Polls cannot be toggled in DMs."
-
     async def com_poll (self, content: str, message: discord.Message):
         content = content.replace ("@everyone", "@ everyone").replace ("@here",
                                                                        "@ here")
+        
+        if len (content) == 0:
+            return "Whoops, invalid arguments!\n\n" + (await self.com_help ("poll", message))
+        
         if message.guild is None:
-            return "Can't do polls in DMs."
+            return COMMAND_NOT_AVAIL_IN_DMS
         else:
-            if not self.configs[message.guild.id][kpolls_enabled]:
-                return "Polls are disabled. Contact an admin."
             if self.configs[message.guild.id][kpoll_channel] == -1:
-                self.configs[message.guild.id][kpoll_channel] = (
-                    await message.guild.create_text_channel ("polls")).id
+                return f"{message.author.mention}, no poll channel is set. Use `{self.get_prefix (message)}settings set {kpoll_channel} <channel>` as " \
+                    f"administrator to set up a poll channel. It is recommended to make this channel read-only for normal " \
+                    f"users, and to disable reactions. To disable polls completely, use the `disable` command." # TODO make automatic setup possible
             channel: discord.TextChannel = message.guild.get_channel (
                 self.configs[message.guild.id][kpoll_channel])
             msg: discord.Message = (
@@ -309,11 +301,9 @@ class Bot (discord.Client):
             await msg.add_reaction (u"\U0001F53D")
             await message.delete () # remove original message (requested by users)
 
-    # TODO setup poll channel set command
-
     async def com_calculate (self, content: str, message: discord.Message):
         if len (content) == 0 or content == "":
-            return await self.com_help ('c', message)
+            return "Whoops, invalid arguments!\n\n" + (await self.com_help ("calculate", message))
         try:
             res = calc.evaluate (content)
         except Exception as e:
@@ -326,14 +316,20 @@ class Bot (discord.Client):
         prefix = self.default_prefix
         if message.guild is not None:
             prefix = self.configs[message.guild.id][kprefix]
-        return f"Hello, {message.author.display_name}! I am this server's **P**ersonal **D**igital **A**ssistant, PDA. You can get a list of commands by typing `{prefix}help`. My author is **Lion#3620**, so talk to him if you have any feature requests or problems, or use the poll below! \n\nMy code is here: <https://github.com/lionkor/discord_PDA>. \n\nHere's a short poll about me: <https://forms.gle/WeJ9JqDABEsAyVhL8>."
+        return f"Hello, {message.author.display_name}! I am this server's **P**ersonal **D**igital **A**ssistant, PDA. " \
+            f"You can get a list of commands by typing `{prefix}help`. An admin can enable and disable any command with " \
+            f"`{prefix}enable <command>` and `{prefix}disable <command>`. My author is **Lion#3620**, so talk to him if " \
+            f"you have any feature requests, questions or problems, or use the poll below! \n\nMy code is here: " \
+            f"<https://github.com/lionkor/discord_PDA>. \n\nHere's a short poll about me: <https://forms.gle/WeJ9JqDABEsAyVhL8>."
 
     async def com_enable (self, content: str, message: discord.Message):
+        if len (content) == 0:
+            return "Whoops, invalid arguments!\n\n" + (await self.com_help ("enable", message))
         if message.guild is not None:
             if not message.author.guild_permissions.administrator:
-                return "Must be administrator to use. Sorry!"
+                return f"{message.author.mention}, you must be administrator to use. Sorry!"
         if message.guild is None:
-            return "Can't disable or enable commands in DMs."
+            return COMMAND_NOT_AVAIL_IN_DMS
         if content not in self.commands:
             return f"I do not know the command `{content}`."
         if content not in self.configs[message.guild.id][kdisabled_commands]:
@@ -347,11 +343,13 @@ class Bot (discord.Client):
         return ret.rstrip (", ") + "."
 
     async def com_disable (self, content: str, message: discord.Message):
+        if len (content) == 0:
+            return "Whoops, invalid arguments!\n\n" + (await self.com_help ("disable", message))
         if message.guild is not None:
             if not message.author.guild_permissions.administrator:
-                return "Must be administrator to use. Sorry!"
+                return f"{message.author.mention}, you must be administrator to use. Sorry!"
         if message.guild is None:
-            return "Can't disable commands in DMs."
+            return COMMAND_NOT_AVAIL_IN_DMS
         if content not in self.commands:
             return f"I do not know the command `{content}`."
         if content == "disable" or content == "enable":
@@ -368,14 +366,46 @@ class Bot (discord.Client):
 
 
     async def com_invite (self, content: str, message: discord.Message):
-        return f"To invite me to your server, go here: <https://discordapp.com/oauth2/authorize?client_id=566669481204514818&scope=bot&permissions=805694679>"
+        return f"To invite me to your server, use this link: <https://discordapp.com/oauth2/authorize?client_id=566669481204514818&scope=bot&permissions=805694679>"
 
-    async def com_getid (self, content, message):
+    async def com_pid (self, content, message):
         import os
         return f"PID: `{os.getpid ()}`"
 
-    async def com_set (self, content: str, message: discord.Message):
-        pass # TODO
+    async def com_settings_set (self, args: list, message: discord.Message):
+        if args[0] == kpoll_channel:
+            if len (message.channel_mentions) != 1:
+                return "Please also provide one mention to the new poll channel."
+            self.configs[message.guild.id][kpoll_channel] = message.channel_mentions[0].id
+            self.configs_save ()
+            return f"Set {kpoll_channel} to {message.channel_mentions[0]}."
+
+    async def com_settings_list (self, content: str, message: discord.Message):
+        return "This feature is still a work-in-progress. Sorry!" # TODO
+
+    async def com_settings (self, content: str, message: discord.Message):
+        if message.guild is not None:
+            if not message.author.guild_permissions.administrator:
+                return f"{message.author.mention}, you must be administrator to use. Sorry!"
+        else:
+            return COMMAND_NOT_AVAIL_IN_DMS
+        
+        subcommands = {
+            "set": self.com_settings_set,
+            "list": self.com_settings_list, 
+        }
+        
+        split = content
+        args = ""
+        if ' ' in content:
+            split = content.split (" ")[0]
+            args = content.split (" ")[1:]
+        
+        for _s, _fn in subcommands.items ():
+            if split == _s:
+                return await _fn (args, message)
+        # if we get to here, no subcommand could be identified, so we just display the help
+        return "Whoops, invalid arguments!\n\n" + (await self.com_help ("settings", message))
 
     commands = {
         "capify":     com_capify,
@@ -384,6 +414,7 @@ class Bot (discord.Client):
         "spoilerize": com_spoilerize,
         "|":          com_spoilerize,
         "prefix":     com_prefix, # admin only
+        "pda-prefix": com_prefix, # admin only
         "help":       com_help,
         "?":          com_help,
         "thanks":     com_thanks,
@@ -398,18 +429,17 @@ class Bot (discord.Client):
         "hello":      com_hello,
         "praise":     com_praise,
         "invite" :    com_invite,
-        "getid" :     com_getid, # dev only, no help
+        "pid" :       com_pid, # dev only, no help. returns current pid.
         "enable" :    com_enable, # admin only
-        "disable":    com_disable, #admin only
-        "set" :       com_set,
-        # TODO set command to set different settings, like the poll channel
+        "disable":    com_disable, # admin only
+        "settings" :  com_settings, # admin only
     }
 
     async def on_ready (self):
         log ('Logged on as {0} in guilds: {1}'.format (self.user,
                                                        self.guilds_list_str (
                                                            self.guilds)))
-        self.load_configs ()
+        self.configs_load ()
         for guild in self.guilds:
             if guild.id not in self.configs.keys ():
                 log (
@@ -420,7 +450,7 @@ class Bot (discord.Client):
                 log (
                     "[OK] Config for \"" + guild.name + "\" found - prefix \"" +
                     self.configs[guild.id][kprefix] + "\"")
-        self.save_configs ()
+        self.configs_save ()
 
     async def on_message (self, message):
         log ('{0.guild}: Message from {0.author} in {0.channel}: \"{0.content}\"'.format (message))
@@ -461,8 +491,8 @@ class Bot (discord.Client):
 
         if message.author == self.user:
             log ('Message from [this bot]: \"{0.content}\"'.format (message))
-        self.save_configs ()
-        self.load_configs () # FIXME this is not the best way, but it fixes joining and not having any defaults configured
+        self.configs_save ()
+        self.configs_load () # FIXME this is not the best way, but it fixes joining and not having any defaults configured
 
     async def on_message_delete (self, message: discord.Message):
         log ("Message by {0.author.id} ({0.author}) deleted: \"{0.content}\"".format (message))

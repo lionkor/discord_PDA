@@ -15,7 +15,7 @@
     "expl": "Displays all commands, or help for a specific command"
   },
   "prefix": {
-    "alias": "",
+    "alias": "pda-prefix",
     "args": "<new prefix>",
     "expl": "Changes bot's prefix"
   },
