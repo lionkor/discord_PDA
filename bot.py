@@ -1,9 +1,5 @@
 # Author @lionkor on github.com
 #
-# I know this code is really bad, I'll refactor it later.
-# It's just a hobby project, you should not use this for
-# bigger servers, probably.
-#
 # ---
 #
 # MIT License
@@ -45,6 +41,7 @@ def log (msg):
     print (time + " [LOG] " + str (msg))
     print (time + " [LOG] " + str (msg), file = open ("log.txt", "a"))
 
+
 kprefix = "prefix"
 kpolls_enabled = "polls_enabled"
 kpoll_channel = "poll_channel"
@@ -65,14 +62,21 @@ class Bot (discord.Client):
 
     configs: {discord.Guild.id : {}} = dict ()
 
-    async def display_help (self, msg: str, message: discord.Message):
-        # use long-help.json for per-command help, otherwise short-help.json.
-        # format:
-        # command: {alias: "..., ...", args: "<...>", expl: "..."}
+    def get_prefix (self, message: discord.Message): # string
+        """
+        helper method for finding the currently valid prefix
+        """
+        if message.guild is None:
+            # is not a server text channel, so default prefix applies
+            return self.default_prefix
+        else:
+            # get server prefix from config
+            return self.configs[message.guild.id][kprefix]
 
-        prefix = self.default_prefix
-        if message.guild is not None:
-            prefix = self.configs[message.guild.id][kprefix]
+    async def display_help (self, msg: str, message: discord.Message):
+        # use long-help.json for per-command help, otherwise short-help.json
+
+        prefix = self.get_prefix (message)
 
         with open ("short-help.json", "r") as shelp:
             obj: {str : dict} = json.load (shelp)
@@ -383,18 +387,18 @@ class Bot (discord.Client):
         "coinflip": coinflip,
         "rng": rng,
         "font": font,
-        "vote": setup_vote,  # admin only
-        "polls": toggle_polls,  # admin only # TODO remove
-        "poll": start_poll,# TODO help
+        "vote": setup_vote,  # admin only, no help (yet)
+        "poll": start_poll,
         "calc": calculate,
         "calculate": calculate,
         "c": calculate,
         "hello": hello,
-        "praise": praise,#TODO help
-        "invite" : invite,#TODO help
+        "praise": praise,
+        "invite" : invite,
         "getid" : get_id, # dev only, no help
-        "enable" : enable,  # admin only#TODO help
-        "disable": disable,  #admin only#TODO help
+        "enable" : enable,  # admin only
+        "disable": disable,  #admin only
+        # TODO set command to set different settings, like the poll channel
     }
 
     async def on_ready (self):
@@ -416,15 +420,9 @@ class Bot (discord.Client):
 
     async def on_message (self, message):
         log ('{0.guild}: Message from {0.author} in {0.channel}: \"{0.content}\"'.format (message))
-        prefix = ""
-        has_prefix = False
-        if message.guild is not None:
-            prefix = self.configs[message.guild.id][kprefix]
-        else:
-            prefix = self.default_prefix
+        prefix = self.get_prefix (message)
         for (_c, _fn) in self.commands.items ():
             if message.content.startswith (prefix):
-                has_prefix = True
                 magic_str = prefix + _c + " "
                 if message.content.startswith (magic_str):
                     cont = ""
@@ -457,15 +455,10 @@ class Bot (discord.Client):
                     await message.channel.send (
                         content = "Prefix reset to " + self.default_prefix)
 
-        if has_prefix:
-            log (
-                'Message from {0.author} in \"{0.channel}\": \"{0.content}\"'
-                    .format (message))
-
         if message.author == self.user:
             log ('Message from [this bot]: \"{0.content}\"'.format (message))
         self.save_configs ()
-        self.load_configs () # FIXME this is not the best way, but it fixes joining and not having a prefix configured
+        self.load_configs () # FIXME this is not the best way, but it fixes joining and not having any defaults configured
 
     async def on_message_delete (self, message: discord.Message):
         log ("Message by {0.author.id} ({0.author}) deleted: \"{0.content}\"".format (message))
