@@ -66,12 +66,12 @@
   },
   "enable": {
     "alias": "",
-    "args": "",
-    "expl": "Enables a command"
+    "args": "<command name or alias>",
+    "expl": "Enables a command and all its aliases"
   },
   "disable": {
     "alias": "",
-    "args": "",
-    "expl": "Disables a command"
+    "args": "<command name / alias>",
+    "expl": "Disables a command and all its aliases"
   }
 }

@@ -96,34 +96,34 @@
     "exmp": "`hello`"
   },
   "poll": {
-    "alias": "",
+    "alias": "poll",
     "args": "<question>",
     "expl": "Posts a poll in the poll channel, with upvote & downvote reactions. Setting the channel is currently a TODO, and it will just create a channel for the polls if none has been configured.",
     "exmp": "`poll Did you like the latest episode of GoT?`"
   },
   "praise": {
-    "alias": "",
+    "alias": "praise",
     "args": "<mention>",
     "expl": "Compliments the mentioned user with a randomly generated compliment. Contact my developer if you want to add more compliments (use the `hello` command to find out more)!",
     "exmp": "`praise @PDA` => `@PDA, you have such nice eyes!`"
   },
   "invite": {
-    "alias": "",
+    "alias": "invite",
     "args": "",
     "expl": "Shows the invite link needed to invite the bot to your own server.",
     "exmp": "`invite`"
   },
   "enable": {
-    "alias": "",
-    "args": "",
-    "expl": "Enables a command that has been disabled via `disable` or is disabled by default. This command and the `disable` command enable the admins of a server to enable and disable some of PDA's functionalities.",
-    "exmp": "`enable praise` enables the praise command (if it has been disabled before)"
+    "alias": "enable",
+    "args": "<command name or alias>",
+    "expl": "Enables a command that has been disabled via `disable` or is disabled by default. This command and the `disable` command make it possible for the admins of a server to enable and disable some of PDA's functionalities.",
+    "exmp": "`enable c` enables the c command and its aliases (calc and calculate)"
   },
   "disable": {
-    "alias": "",
-    "args": "",
-    "expl": "Disables a command. This command and the `enable` command enable the admins of a server to enable and disable some of PDA's functionalities.",
-    "exmp": "`disable praise` disables the praise command"
+    "alias": "disable",
+    "args": "<command name or alias>",
+    "expl": "Disables a command. This command and the `enable` command make it possible for the admins of a server to enable and disable some of PDA's functionalities.",
+    "exmp": "`disable c` disables the c command and its aliases (calc and calculate)"
   }
 }
 

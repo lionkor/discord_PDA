@@ -285,8 +285,6 @@ class Bot (discord.Client):
             polls_enabled = self.default_polls_enabled
             return "Polls cannot be toggled in DMs."
 
-    # TODO delete poll
-
     async def start_poll (self, content: str, message: discord.Message):
         content = content.replace ("@everyone", "@ everyone").replace ("@here",
                                                                        "@ here")
