@@ -29,7 +29,6 @@
 # SOFTWARE.
 #
 
-
 import discord
 from datetime import datetime
 import random
@@ -85,11 +84,11 @@ class Bot (discord.Client):
             if msg not in obj.keys ():
                 return f"I can't find any help for command `{msg.replace ('`', '')}`. Type `{prefix}help` for a list of commands."
             else:
-                return f"Help for `{msg}`:\n" \
-                    f"**Aliases**: {obj[msg]['alias']}\n" \
-                    f"**Arguments**: {obj[msg]['args']}\n" \
-                    f"**Explanation**: {obj[msg]['expl']}\n" \
-                    f"**Example**: {obj[msg]['exmp']}\n" \
+                return f"{message.author.mention}, here's help for `{msg}`:\n" \
+                    f"**> __Aliases__**: \n{obj[msg]['alias']}\n\n" \
+                    f"**> __Arguments__**: \n{obj[msg]['args']}\n\n" \
+                    f"**> __Explanation__**: \n{obj[msg]['expl']}\n\n" \
+                    f"**> __Example__**: \n{obj[msg]['exmp']}\n\n" \
                     f"*(note: don't actually type the `<>` in the arguments)*"
 
         fullhelp = "**PDA Help**\n" \
@@ -97,7 +96,7 @@ class Bot (discord.Client):
             f"For more detailed help about a command, type `{prefix}help command`.\n\n"
 
         for command, opt in obj.items ():
-            if opt["args"] != "":
+            if opt["args"] != "": # TODO fix this whole mess
                 fullhelp += "`" + prefix + command + "`  `" + opt["args"] + "` -- " + opt['expl']
             else:
                 fullhelp += "`" + prefix + command + "` -- " + opt['expl']
@@ -308,6 +307,8 @@ class Bot (discord.Client):
             await msg.add_reaction (u"\U0001F53D")
             await message.delete () # remove original message (requested by users)
 
+    # TODO setup poll channel set command
+
     async def calculate (self, content: str, message: discord.Message):
         if len (content) == 0 or content == "":
             return await self.display_help ('c', message)
@@ -330,7 +331,7 @@ class Bot (discord.Client):
             if not message.author.guild_permissions.administrator:
                 return "Must be administrator to use. Sorry!"
         if message.guild is None:
-            return "Can't disable commands in DMs."
+            return "Can't disable or enable commands in DMs."
         if content not in self.commands:
             return f"I do not know the command `{content}`."
         if content not in self.configs[message.guild.id][kdisabled_commands]:
@@ -367,6 +368,10 @@ class Bot (discord.Client):
     async def invite (self, content: str, message: discord.Message):
         return f"To invite me to your server, go here: <https://discordapp.com/oauth2/authorize?client_id=566669481204514818&scope=bot&permissions=805694679>"
 
+    async def get_id (self, content, message):
+        import os
+        return f"PID: `{os.getpid ()}`"
+
     commands = {
         "capify": capify,
         "aA": capify,
@@ -381,16 +386,17 @@ class Bot (discord.Client):
         "rng": rng,
         "font": font,
         "vote": setup_vote,  # admin only
-        "polls": toggle_polls,  # admin only
-        "poll": start_poll,
+        "polls": toggle_polls,  # admin only # TODO remove
+        "poll": start_poll,# TODO help
         "calc": calculate,
         "calculate": calculate,
         "c": calculate,
         "hello": hello,
-        "praise": praise,
-        "invite" : invite,
-        "enable" : enable,  # admin only
-        "disable": disable,  #admin only
+        "praise": praise,#TODO help
+        "invite" : invite,#TODO help
+        "getid" : get_id, # dev only, no help
+        "enable" : enable,  # admin only#TODO help
+        "disable": disable,  #admin only#TODO help
     }
 
     async def on_ready (self):
@@ -423,16 +429,21 @@ class Bot (discord.Client):
                 has_prefix = True
                 magic_str = prefix + _c + " "
                 if message.content.startswith (magic_str):
-                    await message.channel.send (
-                        content = (
-                            await _fn (self, message.content[len (magic_str):],
-                                       message)))
+                    cont = ""
+                    if message.guild is not None and _c in self.configs[message.guild.id][kdisabled_commands]:
+                        cont = f"This command has been disabled. An admin can enable it with `{prefix}enable {_c}`."
+                    else:
+                        cont = await _fn (self, message.content[len (magic_str):], message)
+                    await message.channel.send (content = cont)
                     break
                 elif message.content == prefix + _c:
-                    await message.channel.send (
-                        content = (
-                            await _fn (self, message.content[len (prefix + _c):],
-                                        message)))
+                    cont = ""
+                    if message.guild is not None and _c in self.configs[message.guild.id][kdisabled_commands]:
+                            cont = f"This command has been disabled. An admin can enable it with `{prefix}enable {_c}`."
+                    else:
+                        cont = await _fn (self, message.content[len (prefix + _c):],
+                                        message)
+                    await message.channel.send (content = cont)
                     break
 
         if message.content.startswith ("++pda_reset_prefix"):

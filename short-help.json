@@ -24,6 +24,11 @@
     "args": "[message]",
     "expl": "Thanks the bot with an optional message"
   },
+  "poll": {
+    "alias": "",
+    "args": "<question>",
+    "expl": "Posts a poll in the poll channel, with upvote & downvote reactions"
+  },
   "coinflip": {
     "alias": "",
     "args": "",
@@ -48,5 +53,25 @@
     "alias": "",
     "args": "",
     "expl": "Displays some information"
+  },
+  "praise": {
+    "alias": "",
+    "args": "<mention>",
+    "expl": "Compliments the mentioned user"
+  },
+  "invite": {
+    "alias": "",
+    "args": "",
+    "expl": "Shows bot invite link"
+  },
+  "enable": {
+    "alias": "",
+    "args": "",
+    "expl": "Enables a command"
+  },
+  "disable": {
+    "alias": "",
+    "args": "",
+    "expl": "Disables a command"
   }
 }

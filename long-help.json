@@ -74,19 +74,19 @@
   "calculate": {
     "alias": "calculate, calc, c",
     "args": "<calculation>",
-    "expl": "Calculates an expression. This uses a custom algorithm. It can process very complicated expressions, which may contain `+ - * / ^` as operators, parentheses `(``)`, functions `sqrt` (square-root), `sin`, `cos`, and the constant `pi`.",
+    "expl": "Calculates an expression. This uses a custom algorithm. It supports the following functionalities:\n**→  ** Common operators: addition (`+`), subtraction (`-`), multiplication (`*`), division (`/`), exponent/power-of (`^`), modulus (`%`)\n**→  ** Functions: square-root (`sqrt(x)`), sin/cos/tan (`cos(x)`, ...), factorial (`fact(x)`), absolute (`abs(x)`), degrees (`degrees(r)`), radians (`radians(d)`), primality check (`prime(x)`)\n**→  ** Bitwise operators (only work on integers): bitwise and, or, xor, left-shift, right-shift (`and`, `or`, `xor`, `<<`. `>>`)\n**→  ** Equality / relational operators (return `1` for `true`, `0` for `false`): equals, not-equals, larger-equals, smaller-equals, larger-than, smaller-than (`==`, `!=`, `>=`, `<=`, `>`, `<`)\n**→  ** Floating point operands (for example `2.515` / `2,515`)\n**→  ** Whitespace is ignored, so spaces etc. don't make a difference\n**→  ** Parentheses, example `1/(9/4)`, and nested parentheses, example `1/((2*4)/4.21)`\n",
     "exmp": "`c (15.8 / (3 / 4)) ^ 2` => `443.8044444444444`"
   },
   "calc": {
     "alias": "calculate, calc, c",
     "args": "<calculation>",
-    "expl": "Calculates an expression. This uses a custom algorithm. It can process very complicated expressions, which may contain `+ - * / ^` as operators, parentheses `(``)`, functions `sqrt` (square-root), `sin`, `cos`, and the constant `pi`.",
+    "expl": "Calculates an expression. This uses a custom algorithm. It supports the following functionalities:\n**→  ** Common operators: addition (`+`), subtraction (`-`), multiplication (`*`), division (`/`), exponent/power-of (`^`), modulus (`%`)\n**→  ** Functions: square-root (`sqrt(x)`), sin/cos/tan (`cos(x)`, ...), factorial (`fact(x)`), absolute (`abs(x)`), degrees (`degrees(r)`), radians (`radians(d)`), primality check (`prime(x)`)\n**→  ** Bitwise operators (only work on integers): bitwise and, or, xor, left-shift, right-shift (`and`, `or`, `xor`, `<<`. `>>`)\n**→  ** Equality / relational operators (return `1` for `true`, `0` for `false`): equals, not-equals, larger-equals, smaller-equals, larger-than, smaller-than (`==`, `!=`, `>=`, `<=`, `>`, `<`)\n**→  ** Floating point operands (for example `2.515` / `2,515`)\n**→  ** Whitespace is ignored, so spaces etc. don't make a difference\n**→  ** Parentheses, example `1/(9/4)`, and nested parentheses, example `1/((2*4)/4.21)`\n",
     "exmp": "`c (15.8 / (3 / 4)) ^ 2` => `443.8044444444444`"
   },
   "c": {
     "alias": "calculate, calc, c",
     "args": "<calculation>",
-    "expl": "Calculates an expression. This uses a custom algorithm. It can process very complicated expressions, which may contain `+ - * / ^` as operators, parentheses `(``)`, functions `sqrt` (square-root), `sin`, `cos`, and the constant `pi`.",
+    "expl": "Calculates an expression. This uses a custom algorithm. It supports the following functionalities:\n**→  ** Common operators: addition (`+`), subtraction (`-`), multiplication (`*`), division (`/`), exponent/power-of (`^`), modulus (`%`)\n**→  ** Functions: square-root (`sqrt(x)`), sin/cos/tan (`cos(x)`, ...), factorial (`fact(x)`), absolute (`abs(x)`), degrees (`degrees(r)`), radians (`radians(d)`), primality check (`prime(x)`)\n**→  ** Bitwise operators (only work on integers): bitwise and, or, xor, left-shift, right-shift (`and`, `or`, `xor`, `<<`. `>>`)\n**→  ** Equality / relational operators (return `1` for `true`, `0` for `false`): equals, not-equals, larger-equals, smaller-equals, larger-than, smaller-than (`==`, `!=`, `>=`, `<=`, `>`, `<`)\n**→  ** Floating point operands (for example `2.515` / `2,515`)\n**→  ** Whitespace is ignored, so spaces etc. don't make a difference\n**→  ** Parentheses, example `1/(9/4)`, and nested parentheses, example `1/((2*4)/4.21)`\n",
     "exmp": "`c (15.8 / (3 / 4)) ^ 2` => `443.8044444444444`"
   },
   "hello": {
@@ -94,5 +94,36 @@
     "args": " ",
     "expl": "Displays some information about this bot, like who made it, where its source code can be found (I'm Open-Source (MIT)), and a poll!",
     "exmp": "`hello`"
+  },
+  "poll": {
+    "alias": "",
+    "args": "<question>",
+    "expl": "Posts a poll in the poll channel, with upvote & downvote reactions. Setting the channel is currently a TODO, and it will just create a channel for the polls if none has been configured.",
+    "exmp": "`poll Did you like the latest episode of GoT?`"
+  },
+  "praise": {
+    "alias": "",
+    "args": "<mention>",
+    "expl": "Compliments the mentioned user with a randomly generated compliment. Contact my developer if you want to add more compliments (use the `hello` command to find out more)!",
+    "exmp": "`praise @PDA` => `@PDA, you have such nice eyes!`"
+  },
+  "invite": {
+    "alias": "",
+    "args": "",
+    "expl": "Shows the invite link needed to invite the bot to your own server.",
+    "exmp": "`invite`"
+  },
+  "enable": {
+    "alias": "",
+    "args": "",
+    "expl": "Enables a command that has been disabled via `disable` or is disabled by default. This command and the `disable` command enable the admins of a server to enable and disable some of PDA's functionalities.",
+    "exmp": "`enable praise` enables the praise command (if it has been disabled before)"
+  },
+  "disable": {
+    "alias": "",
+    "args": "",
+    "expl": "Disables a command. This command and the `enable` command enable the admins of a server to enable and disable some of PDA's functionalities.",
+    "exmp": "`disable praise` disables the praise command"
   }
 }
+
