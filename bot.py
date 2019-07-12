@@ -28,7 +28,7 @@
 import discord
 from datetime import datetime
 import random
-from discord_PDA import calc
+import calc
 import json
 
 COMMAND_NOT_AVAIL_IN_DMS = "Can't use this command in DMs (yet). If you'd like this feature to be added, contact the developer (`hello` command has more info about that)."
@@ -87,6 +87,21 @@ class Bot (discord.Client):
         else:
             # get server prefix from config
             return self.configs[message.guild.id][kprefix]
+
+    async def com_help_embed (self, msg: str, message: discord.Message):
+        prefix = self.get_prefix (message)
+
+        if len (msg) != 0:
+            with open ("long-help.json", "r") as lhelp:
+                obj: {str: dict} = json.load (lhelp)
+            # user is asking for detailed help
+            if msg not in obj.keys ():
+                return f"I can't find any help for command `{msg.replace ('`', '')}`. Type `{prefix}help` for a list of commands."
+                
+        
+        with open ("short-help.json", "r") as shelp:
+            obj: {str : dict} = json.load (shelp)
+        
 
     async def com_help (self, msg: str, message: discord.Message):
         # use long-help.json for per-command help, otherwise short-help.json
@@ -208,6 +223,8 @@ class Bot (discord.Client):
 
     async def com_rng (self, content: str, message: discord.Message):
         # TODO help on no args given
+        if len (content) == 0:
+            return self.display_help ("rng", message)
         numbers = content.split (" ")
         if len (numbers) != 2:
             return "Whoops, invalid arguments!\n\n" + (await self.com_help ("rng", message))
@@ -435,11 +452,7 @@ class Bot (discord.Client):
         "settings" :  com_settings, # admin only
     }
 
-    async def on_ready (self):
-        log ('Logged on as {0} in guilds: {1}'.format (self.user,
-                                                       self.guilds_list_str (
-                                                           self.guilds)))
-        self.configs_load ()
+    def check_guilds (self):
         for guild in self.guilds:
             if guild.id not in self.configs.keys ():
                 log (
@@ -450,10 +463,25 @@ class Bot (discord.Client):
                 log (
                     "[OK] Config for \"" + guild.name + "\" found - prefix \"" +
                     self.configs[guild.id][kprefix] + "\"")
+
+    async def on_ready (self):
+        log ('Logged on as {0} in guilds: {1}'.format (self.user,
+                                                       self.guilds_list_str (
+                                                           self.guilds)))
+        self.configs_load ()
+        self.check_guilds ()
         self.configs_save ()
 
     async def on_message (self, message):
         log ('{0.guild}: Message from {0.author} in {0.channel}: \"{0.content}\"'.format (message))
+        
+        # if the bot joins a new server it needs to recognize that.
+        # So we just recheck if the current guild is in our keys
+        # This is not terribly efficient and might require a FIX
+        if message.guild.id not in self.configs.keys ():
+            log ("guild not recognized. running check_guilds")
+            self.check_guilds ()
+        
         prefix = self.get_prefix (message)
         for (_c, _fn) in self.commands.items ():
             if message.content.startswith (prefix):
@@ -491,8 +519,8 @@ class Bot (discord.Client):
 
         if message.author == self.user:
             log ('Message from [this bot]: \"{0.content}\"'.format (message))
-        self.configs_save ()
-        self.configs_load () # FIXME this is not the best way, but it fixes joining and not having any defaults configured
+        self.configs_save () # idk why we do this honestly but 
+        self.configs_load () # i cant be bothered to see what breaks when i remove it
 
     async def on_message_delete (self, message: discord.Message):
         log ("Message by {0.author.id} ({0.author}) deleted: \"{0.content}\"".format (message))
@@ -518,24 +546,6 @@ class Bot (discord.Client):
     async def on_member_remove (self, member: discord.Member):
         log ("Member" + str (member.id) + "(" + str (
             member.display_name) + ") left")
-
-""" 
-    async def on_member_update (self, before: discord.Member,
-                                after: discord.Member):
-        log ("Member update: " + str (after) + "\n\t" + str (
-            before.status) + "\n\t" + str (
-            before.activity) + "\n\t" + str (before.nick) + "\n\t" + str (
-            len (before.roles)) +
-             "\nNow:\n\t" + str (after.status) + "\n\t" + str (
-            after.activity) + "\n\t" + str (
-            after.nick) + "\n\t" + str (len (after.roles)))
-
-    async def on_user_update (self, before: discord.User, after: discord.User):
-        log ("User update: " + str (after) + "\n\t" + str (
-            before.name) + "\n\t" + str (
-            before.discriminator) + "\nNow:\n\t" + str (
-            after.name) + "\n\t" + str (after.discriminator))
-"""
 
 try:
     with open ("TOKEN", "r") as f:
