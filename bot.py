@@ -28,7 +28,7 @@
 import discord
 from datetime import datetime
 import random
-from discord_PDA import calc
+import calc
 import json
 
 COMMAND_NOT_AVAIL_IN_DMS = "Can't use this command in DMs (yet). If you'd like this feature to be added, contact the developer (`hello` command has more info about that)."
@@ -318,7 +318,7 @@ class Bot (discord.Client):
             prefix = self.configs[message.guild.id][kprefix]
         return f"Hello, {message.author.display_name}! I am this server's **P**ersonal **D**igital **A**ssistant, PDA. " \
             f"You can get a list of commands by typing `{prefix}help`. An admin can enable and disable any command with " \
-            f"`{prefix}enable <command>` and `{prefix}disable <command>`. My author is **Lion#3620**, so talk to him if " \
+            f"`{prefix}enable <command>` and `{prefix}disable <command>`. My author is **Harold#4650**, so talk to him if " \
             f"you have any feature requests, questions or problems, or use the poll below! \n\nMy code is here: " \
             f"<https://github.com/lionkor/discord_PDA>. \n\nHere's a short poll about me: <https://forms.gle/WeJ9JqDABEsAyVhL8>."
 
@@ -366,7 +366,8 @@ class Bot (discord.Client):
 
 
     async def com_invite (self, content: str, message: discord.Message):
-        return f"To invite me to your server, use this link: <https://discordapp.com/oauth2/authorize?client_id=566669481204514818&scope=bot&permissions=805694679>"
+        return f"To invite me to your server, use this link: <https://discordapp.com/oauth2/authorize?client_id=607712990669832222&scope=bot&permissions=805694679>"
+
 
     async def com_pid (self, content, message):
         import os
